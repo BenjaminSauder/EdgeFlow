@@ -10,7 +10,7 @@ Anyhow lets start with a brief overview:
 
 ![Set_Flow_Demo](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Set_Flow_Demo.jpg)
 
-  My stab at implementing a set flow operator for blender, which is a popular tool in 3ds max and maya. This adjusts the edgeloop    via a spline interpolation such that it respects the flow of the surrounding geometry.
+  My stab at implementing a set flow operator for blender, which is a popular tool in 3ds max and maya. This adjusts the edgeloop via a spline interpolation such that it respects the flow of the surrounding geometry.
 
 #### Set edge linear:
 
