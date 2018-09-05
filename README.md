@@ -2,7 +2,7 @@
 
 This addon adds two operators to blender which both work on edgeloop selections.
 
-Feel free to create issues, file requets etc. but be aware of that I might not find time to work on this as much as I'd probably need to. We'll see how that goes. 
+Feel free to create issues, file requets etc. but be aware of that I might not find time to work on this as much as I'd probably need to. I do plan to make it work for blender 2.8 tho. We'll see how that goes. 
 
 Anyhow lets start with a brief overview:
 
@@ -67,7 +67,7 @@ As already mentioned this is basically two tools in one. The first case is if yo
 ![Set_Linear_Demo2](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Set_Linear_Demo2.jpg)
 
 
-The second case is if the selection consits only of single edges - most common in edge rings. Once applied it straightens the edges to the next connected vert and makes sure the distance is even everywhere. This is handy for tweaking control loops for SubD Modelling.
+The second case is if the selection consits only of single edges - most common in edge rings. Once applied it straightens the edges to the next connected vert and makes sure the distance is even everywhere. This is handy for tweaking control loops for SubD Modelling. Mostly inspired by an older 3ds maxscript from Christoph Kubisch: http://luxinia.de/index.php/ArtTools/3dsmax
 
 ![Set_Linear_Demo3](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Set_Linear_Demo3.jpg)
 
