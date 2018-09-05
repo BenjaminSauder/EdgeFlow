@@ -21,12 +21,13 @@ This tool has two modes, the first makes each selected edge loop linear, the lat
 ### A more indepth description of these tools can be found bellow.
 
 
-### Where are these located in blender?
+
+## Where are these located in blender?
 
 Both can be accessed via the 'Mesh>Edges' Menu or the Edge Menu Shortcut (Ctrl-E). The two commands should be there at the bottom. As mentioned both operate on edge selections - mostly edgeloops.
 
 
-### Installation
+## Installation
 * grab the most recent .zip from the depoly folder
 * start Blender and open the user preferences
 * switch to the Add-ons tab and click the Install Add-on from file... button at the bottom
@@ -39,11 +40,13 @@ Both can be accessed via the 'Mesh>Edges' Menu or the Edge Menu Shortcut (Ctrl-E
 This operator has three options to play with:
 
 #### Tension: 
-controls the strengh of offset 
+Controls the strengh of offset 
 #### Iterations: 
-how often the operation will be repeated
+How often the operation will be repeated
 #### Min Angle:
-cut off angle of the smoothing. Falls back to a linearely extrapolated position if the angle is beyond threshold. In this example the control points for the spline smoothing are around the corner - which creates a nasty bulge. With the min angle one can force the alghorithm to find a better solution.
+Cut off angle of the smoothing. Falls back to a linearely extrapolated position if the angle is beyond threshold. 
+
+In this example the control points for the spline smoothing are around the corner - which creates a nasty bulge. With the min angle one can force the alghorithm to find a better solution.
 ![MIn_Angle_Demo](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Min_Angle_Demo.jpg)
 
 
