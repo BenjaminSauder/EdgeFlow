@@ -71,3 +71,9 @@ The second case is if the selection consits only of single edges - most common i
 
 ![Set_Linear_Demo3](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Set_Linear_Demo3.jpg)
 
+
+## Developer Notes
+
+I had to reimplement the edge loop selection from blender because I needed to go from a spaghetti edge selection to sorted edgeloops. While I like that I was able to reproduce blenders selection behaviour I still think I might have overlooked something on how to do it with the regular api - any hints?
+
+I tried different spline interpolation implementations but settled with a hermite interpolation from http://paulbourke.net/miscellaneous/interpolation/ as it has this nice tension variable.
