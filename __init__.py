@@ -6,6 +6,8 @@ bl_info = {
     "version": (0, 1),
     "location": "Mesh > Edge > Set Edge Flow",
     "blender": (2, 79, 0),
+    "tracker_url": "https://github.com/BenjaminSauder/EdgeFlow/issues",
+    "wiki_url": "https://github.com/BenjaminSauder/EdgeFlow" ,
 }
 
 
