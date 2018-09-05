@@ -12,11 +12,14 @@ This addon adds two operators to blender which both work on edgeloop selections.
 
 ![Set_Linear_Demo](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Set_Linear_Demo.jpg)
 
-  If the edgeloop length is longer than one, makes each selected edge loop linear.
-If the selection is only made up of unconnected edges (think of an edge ring here) adjusts the length of each edge.
+This tool has two modes, the first makes each selected edge loop linear, the later works on edge rings and straightens them and adjusts each edge length.
+
+### A more indepth description of these tools can be found bellow.
 
 
-Both can be accessed via the 'Mesh>Edges' Menu or the Edge Menu Shortcut (Ctrl-E). The two commands should be there at the bottom.
+### Where are these located in blender?
+
+Both can be accessed via the 'Mesh>Edges' Menu or the Edge Menu Shortcut (Ctrl-E). The two commands should be there at the bottom. As mentioned both operate on edge selections - mostly edgeloops.
 
 
 ### Installation
@@ -53,7 +56,7 @@ So its all depending on the surrounding geometry - which also means if we have m
 
 ## Set edge linear
 
-As already mentioned this is basically two tools in one. The first case is if you just select regular edge loops
+As already mentioned this is basically two tools in one. The first case is if you just select regular edge loops. After running the operator each loop should be linear from start to end point. The spacing of all the other points can either be spaced evenly, or projected from the original distances.
 
 ![Set_Linear_Demo2](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Set_Linear_Demo2.jpg)
 
