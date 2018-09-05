@@ -2,6 +2,10 @@
 
 This addon adds two operators to blender which both work on edgeloop selections.
 
+Feel free to create issues, file requets etc. but be aware of that I might not find time to work on this as much as I'd probably need to. We'll see how that goes. 
+
+Anyhow lets start with a brief overview:
+
 #### Set edge flow:
 
 ![Set_Flow_Demo](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Set_Flow_Demo.jpg)
@@ -39,8 +43,7 @@ controls the strengh of offset
 #### Iterations: 
 how often the operation will be repeated
 #### Min Angle:
-cut off angle of the smoothing. Falls back to a linear extrapolated position if the angle is beyond threshold. See example bellow.
-
+cut off angle of the smoothing. Falls back to a linearely extrapolated position if the angle is beyond threshold. In this example the control points for the spline smoothing are around the corner - which creates a nasty bulge. With the min angle one can force the alghorithm to find a better solution.
 ![MIn_Angle_Demo](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Min_Angle_Demo.jpg)
 
 
