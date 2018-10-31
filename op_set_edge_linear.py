@@ -18,7 +18,7 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
     def draw(self, context):
         layout = self.layout
         column = layout.column()
-        if self.do_straighten():
+        if self.do_straighten:
             column.prop(self, "distance")
         else:
             column.prop(self, "space_evenly")
@@ -30,20 +30,27 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
         if "CANCELLED" in result:
             return result
 
-        if self.do_straighten():
+        self.do_straighten = self.can_straighten()
+        if self.do_straighten:
             distance = 0
-            for edgeloop in self.edgeloops:
-                distance += edgeloop.get_average_distance()
-            distance /= len(self.edgeloops)
+            edge_count = 0
+            for obj in self.objects:
+                for edgeloop in self.edgeloops[obj]:
+                    distance += edgeloop.get_average_distance()
+
+                edge_count += len(self.edgeloops[obj])
+
+            distance /= edge_count
 
             self.distance = distance * 0.35
 
         return self.execute(context)
 
-    def do_straighten(self):
-        for edgeloop in self.edgeloops:
-            if len(edgeloop.edges) != 1:
-                return False
+    def can_straighten(self):
+        for obj in self.objects:
+            for edgeloop in self.edgeloops[obj]:
+                if len(edgeloop.edges) != 1:
+                    return False
 
         return True
 
@@ -53,12 +60,14 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
         self.revert()
 
-        for edgeloop in self.edgeloops:
-            if self.do_straighten():
-                edgeloop.straighten(self.distance)
-            else:
-                edgeloop.set_linear(self.space_evenly)
+        for obj in self.objects:
+            for edgeloop in self.edgeloops[obj]:
+                if self.do_straighten:
+                    edgeloop.straighten(self.distance)
+                else:
+                    edgeloop.set_linear(self.space_evenly)
 
-        self.bm.to_mesh(self.obj.data)
+            self.bm[obj].to_mesh(obj.data)
+
         bpy.ops.object.mode_set(mode='EDIT')
         return {'FINISHED'}

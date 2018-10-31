@@ -16,9 +16,11 @@ class SetEdgeLoopBase():
 
     def revert(self):
         # print("reverting vertex positions")
-        for vert, pos in self.vert_positions.items():
-            # print("revert: %s -> %s" % (vert.index, pos))
-            vert.co = pos
+        for obj in self.objects:
+            if  obj in self.vert_positions:
+                for vert, pos in self.vert_positions[obj].items():
+                    # print("revert: %s -> %s" % (vert.index, pos))
+                    vert.co = pos
 
     @classmethod
     def poll(cls, context):
@@ -30,30 +32,42 @@ class SetEdgeLoopBase():
 
     def invoke(self, context):
         print("base invoke")
-        self.obj = context.active_object
+
+        self.objects = set(context.selected_editable_objects)
+        self.bm = {}
+        self.edgeloops = {}
+        self.vert_positions = {}
 
         bpy.ops.object.mode_set(mode='OBJECT')
-        self.bm = self.get_bm(self.obj)
 
-        edges = [e for e in self.bm.edges if e.select]
+        ignore = set()
 
-        if len(edges) == 0:
-            print("no edges selected")
-            bpy.ops.object.mode_set(mode='EDIT')
-            return {'CANCELLED'}
+        for obj in self.objects:
+            self.bm[obj] = self.get_bm(obj)
 
-        self.edges = edges
+            edges = [e for e in self.bm[obj].edges if e.select]
 
-        self.vert_positions = {}
-        for e in edges:
-            for v in e.verts:
-                if v not in self.vert_positions:
-                    # print("storing: %s " % v.co)
-                    p = v.co.copy()
-                    p = p.freeze()
-                    self.vert_positions[v] = p
+            if len(edges) == 0:
+                ignore.add(obj)
+                continue
+                #print("no edges selected")
+                #bpy.ops.object.mode_set(mode='EDIT')
+                #return {'CANCELLED'}
 
-        self.edgeloops = util.get_edgeloops(self.bm, self.edges)
+            #self.edges = edges
+
+            self.vert_positions[obj] = {}
+            for e in edges:
+                for v in e.verts:
+                    if v not in self.vert_positions[obj]:
+                        # print("storing: %s " % v.co)
+                        p = v.co.copy()
+                        p = p.freeze()
+                        self.vert_positions[obj][v] = p
+
+            self.edgeloops[obj] = util.get_edgeloops(self.bm[obj], edges)
+
+        self.objects = self.objects - ignore
 
         return {'PASS_THROUGH'}
 
@@ -78,11 +92,13 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
 
         self.revert()
 
-        for i in range(self.iterations):
-            for edgeloop in self.edgeloops:
-                edgeloop.set_flow(self.tension / 100.0, math.radians(self.min_angle) )
+        for obj in self.objects:
+            for i in range(self.iterations):
+                for edgeloop in self.edgeloops[obj]:
+                    edgeloop.set_flow(self.tension / 100.0, math.radians(self.min_angle) )
 
-        self.bm.to_mesh(self.obj.data)
+            self.bm[obj].to_mesh(obj.data)
+
         bpy.ops.object.mode_set(mode='EDIT')
 
         return {'FINISHED'}
