@@ -3,9 +3,9 @@ bl_info = {
     "category": "Mesh",
     "author": "Benjamin Sauder",
     "description": "helps adjusting edge loops",
-    "version": (0, 1),
+    "version": (0, 2),
     "location": "Mesh > Edge > Set Edge Flow",
-    "blender": (2, 79, 0),
+    "blender": (2, 80, 0),
     "tracker_url": "https://github.com/BenjaminSauder/EdgeFlow/issues",
     "wiki_url": "https://github.com/BenjaminSauder/EdgeFlow" ,
 }

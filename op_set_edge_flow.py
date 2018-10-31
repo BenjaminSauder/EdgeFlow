@@ -20,14 +20,17 @@ class SetEdgeLoopBase():
             # print("revert: %s -> %s" % (vert.index, pos))
             vert.co = pos
 
+    @classmethod
+    def poll(cls, context):
+        return (
+            context.space_data.type == 'VIEW_3D'
+            and context.active_object is not None
+            and context.active_object.type == "MESH"
+            and context.active_object.mode == 'EDIT')
 
     def invoke(self, context):
         print("base invoke")
-        self.obj = bpy.context.scene.objects.active
-
-        if not self.obj or self.obj.type != "MESH":
-            print("not a mesh")
-            return {'CANCELLED'}
+        self.obj = context.active_object
 
         bpy.ops.object.mode_set(mode='OBJECT')
         self.bm = self.get_bm(self.obj)
@@ -63,10 +66,10 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "adjust edge loops to curvature"
 
-    tension = IntProperty(name="Tension", default=180, min=-500, max=500)
-    iterations = IntProperty(name="Iterations", default=1, min=1, max=32)
+    tension : IntProperty(name="Tension", default=180, min=-500, max=500)
+    iterations : IntProperty(name="Iterations", default=1, min=1, max=32)
     #bias = IntProperty(name="Bias", default=0, min=-100, max=100)
-    min_angle = IntProperty(name="Min Angle", default=0, min=0, max=180, subtype='FACTOR' )
+    min_angle : IntProperty(name="Min Angle", default=0, min=0, max=180, subtype='FACTOR' )
 
 
     def execute(self, context):
