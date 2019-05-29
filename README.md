@@ -2,7 +2,7 @@
 
 This addon adds two operators to blender which both work on edgeloop selections.
 
-Feel free to create issues, file requets etc. but be aware of that I might not find time to work on this as much as I'd probably need to. I do plan to make it work for blender 2.8 tho. We'll see how that goes. 
+Feel free to create issues, file requests etc. but be aware of that I might not find time to work on this as much as I'd probably need to. 
 
 Anyhow lets start with a brief overview:
 
@@ -24,10 +24,12 @@ This tool has two modes, the first makes each selected edge loop linear, the lat
 
 ## Where are these located in blender?
 
-Both can be accessed via the 'Mesh>Edges' Menu or the Edge Menu Shortcut (Ctrl-E). The two commands should be there at the bottom. As mentioned both operate on edge selections - mostly edgeloops.
+Both can be accessed via the 'Mesh>Edges' menu, the viewport edge context menu (right-click in edge mode) or the edge menu Shortcut (Ctrl-E). The two commands should be there at the bottom. As mentioned both operate on edge selections - mostly edgeloops.
 
 
 ## Installation
+Master is now the 2.8 version! if you need the 2.7 version go to the blender_27 branch.
+
 * grab the most recent .zip from the depoly folder
 * start Blender and open the user preferences
 * switch to the Add-ons tab and click the Install Add-on from file... button at the bottom
