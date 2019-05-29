@@ -63,6 +63,7 @@ def register():
         bpy.utils.register_class(c)
 
     bpy.types.VIEW3D_MT_edit_mesh_edges.append(menu_func)
+    bpy.types.VIEW3D_MT_edit_mesh_context_menu.append(menu_func)
 
 def unregister():
     if prefs.isDebug:
@@ -72,5 +73,6 @@ def unregister():
         bpy.utils.unregister_class(c)
 
     bpy.types.VIEW3D_MT_edit_mesh_edges.remove(menu_func)
+    bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(menu_func)
 
 

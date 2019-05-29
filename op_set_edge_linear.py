@@ -24,7 +24,7 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
             column.prop(self, "space_evenly")
 
     def invoke(self, context, event):
-        print("--------------------")
+        #print("--------------------")
         result = super(SetEdgeLinearOP, self).invoke(context)
 
         if "CANCELLED" in result:
@@ -55,7 +55,7 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
         return True
 
     def execute(self, context):
-        print("execute")
+        #print("execute")
         bpy.ops.object.mode_set(mode='OBJECT')
 
         self.revert()

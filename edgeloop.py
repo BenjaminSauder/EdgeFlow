@@ -94,17 +94,17 @@ class Loop():
             b3 = a.link_loop_radial_prev.link_loop_next.vert
             b4 = a.link_loop_radial_prev.link_loop_next.link_loop_next.vert
 
-            print(a1.index, a2.index, a3.index, a4.index)
-            print(b1.index, b2.index, b3.index, b4.index)
+            #print(a1.index, a2.index, a3.index, a4.index)
+            #print(b1.index, b2.index, b3.index, b4.index)
 
             count = len(self.edge_rings[edge])
-            print("edges: %s" % count)
+            #print("edges: %s" % count)
 
             for index, loop in enumerate(self.edge_rings[edge]):
                 # print(loop.edge.index)
                 # print( loop.edge.verts[0].index, loop.edge.verts[1].index )
                 value = (index + 1) * (1.0 / (count + 1))
-                print(value)
+                #print(value)
                 result_A = interpolate.hermite_3d(a1.co, a2.co, a3.co, a4.co, value, -tension, 0)
                 result_B = interpolate.hermite_3d(b1.co, b2.co, b3.co, b4.co, value, -tension, 0)
 
@@ -155,6 +155,11 @@ class Loop():
         a1 = edge.verts[0]
         a2 = edge.verts[1]
 
+        a1_len = len(a1.link_edges)
+        a2_len =  len(a2.link_edges)
+        if a1_len <= 3 or a2_len <= 3:
+            return
+
         b1 = find_neighbour(a1)
         b2 = find_neighbour(a2)
 
@@ -173,7 +178,7 @@ class Loop():
         if count < 2:
             return
 
-        print("even_spacing:", even_spacing)
+        #print("even_spacing:", even_spacing)
 
         for p in self.edges[0].verts:
             if p not in self.edges[1].verts:
@@ -227,8 +232,8 @@ class Loop():
                 p3 = ring2.link_loop_radial_next.vert
                 p4 = None
 
-                print("ring1 %s - %s" % (ring1.vert.index, ring1.edge.index))
-                print("ring2 %s - %s" % (ring2.vert.index, ring2.edge.index))
+                #print("ring1 %s - %s" % (ring1.vert.index, ring1.edge.index))
+                #print("ring2 %s - %s" % (ring2.vert.index, ring2.edge.index))
                 # print("p2: %s - p3: %s " % (p2.index, p3.index))
 
                 result = []
@@ -240,7 +245,7 @@ class Loop():
                     # else:
                     #    final = ring1
 
-                    print("is_quad:", is_quad, " - ", final.edge.index)
+                    #print("is_quad:", is_quad, " - ", final.edge.index)
 
                     a, b = final.edge.verts
                     if p2 == a:
@@ -273,7 +278,7 @@ class Loop():
                     # else:
                     #    final = ring2
 
-                    print("is_quad:", is_quad, " - ", final.edge.index)
+                    #print("is_quad:", is_quad, " - ", final.edge.index)
 
                     a, b = final.edge.verts
 

@@ -31,7 +31,7 @@ class SetEdgeLoopBase():
             and context.active_object.mode == 'EDIT')
 
     def invoke(self, context):
-        print("base invoke")
+        #sprint("base invoke")
 
         self.objects = set(context.selected_editable_objects)
         self.bm = {}
