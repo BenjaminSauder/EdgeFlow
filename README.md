@@ -30,11 +30,13 @@ Both can be accessed via the 'Mesh>Edges' menu, the viewport edge context menu (
 ## Installation
 Master is now the 2.8 version! if you need the 2.7 version go to the blender_27 branch.
 
-* grab the most recent .zip from the depoly folder
+* Get the latest EdgeFlow.zip release in: https://github.com/BenjaminSauder/EdgeFlow/releases
 * start Blender and open the user preferences
 * switch to the Add-ons tab and click the Install Add-on from file... button at the bottom
 * locate the downloaded EdgeFlow.zip file and double-click it
-* activate the addon by ticking the checkbox and hit the Save User Settings button at the bottom
+* search for the addon "EdgeFlow"
+* activate the addon by ticking the checkbox (hit the Save User Settings button at the bottom if your blender is setup that way)
+
 
 
 ## Set edge flow
