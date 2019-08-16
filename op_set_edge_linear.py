@@ -56,6 +56,10 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
     def execute(self, context):
         #print("execute")
+        
+        if not hasattr(self, "objects") or not self.objects:
+            return self.invoke(context, None)
+
         bpy.ops.object.mode_set(mode='OBJECT')
 
         self.revert()

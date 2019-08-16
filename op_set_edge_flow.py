@@ -31,7 +31,7 @@ class SetEdgeLoopBase():
             and context.active_object.mode == 'EDIT')
 
     def invoke(self, context):
-        #sprint("base invoke")
+        # print("base invoke")
 
         self.objects = set(context.selected_editable_objects)
         self.bm = {}
@@ -81,13 +81,17 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     bl_description = "adjust edge loops to curvature"
 
     tension : IntProperty(name="Tension", default=180, min=-500, max=500)
-    iterations : IntProperty(name="Iterations", default=1, min=1, max=32)
+    iterations : IntProperty(name="Iterations", default=1, min=1, soft_max=32)
     #bias = IntProperty(name="Bias", default=0, min=-100, max=100)
     min_angle : IntProperty(name="Min Angle", default=0, min=0, max=180, subtype='FACTOR' )
 
 
     def execute(self, context):
-        #print ("execute")
+        # print ("execute")
+        # print(f"Tension:{self.tension} Iterations:{self.iterations}")
+        if not hasattr(self, "objects") or not self.objects:
+            return self.invoke(context, None)
+
         bpy.ops.object.mode_set(mode='OBJECT')
 
         self.revert()
@@ -104,7 +108,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        #print("invoke")
+        # print("invoke")
 
         self.tension = 180
         self.iterations = 1
