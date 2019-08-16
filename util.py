@@ -189,7 +189,7 @@ def get_edgeloops(bm, edges):
             if edge in not_visited:
                 not_visited.remove(edge)
 
-    print("edge_loops:", len(edge_loops))
+    # print("edge_loops:", len(edge_loops))
 
     edge_loops = compute_edgeloop_data(edge_loops)
     return edge_loops
