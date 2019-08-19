@@ -110,10 +110,11 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     def invoke(self, context, event):
         # print("invoke")
 
-        self.tension = 180
-        self.iterations = 1
-        self.bias = 0
-        #self.min_angle = 0
+        if event:
+            self.tension = 180
+            self.iterations = 1
+            self.bias = 0
+            #self.min_angle = 0
 
         result = super(SetEdgeFlowOP, self).invoke(context)
 
