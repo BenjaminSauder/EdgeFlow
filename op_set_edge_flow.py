@@ -7,6 +7,9 @@ from . import util
 
 class SetEdgeLoopBase():
 
+    def __init__(self):
+        self.is_invoked = False
+
     def get_bm(self, obj):
         bm = bmesh.new()
         bm.from_mesh(obj.data)
@@ -32,6 +35,7 @@ class SetEdgeLoopBase():
 
     def invoke(self, context):
         # print("base invoke")
+        self.is_invoked = True
 
         self.objects = set(context.selected_editable_objects)
         self.bm = {}
@@ -50,12 +54,7 @@ class SetEdgeLoopBase():
             if len(edges) == 0:
                 ignore.add(obj)
                 continue
-                #print("no edges selected")
-                #bpy.ops.object.mode_set(mode='EDIT')
-                #return {'CANCELLED'}
-
-            #self.edges = edges
-
+            
             self.vert_positions[obj] = {}
             for e in edges:
                 for v in e.verts:
@@ -68,9 +67,6 @@ class SetEdgeLoopBase():
             self.edgeloops[obj] = util.get_edgeloops(self.bm[obj], edges)
 
         self.objects = self.objects - ignore
-
-        return {'PASS_THROUGH'}
-
 
 
 class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
@@ -89,7 +85,8 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     def execute(self, context):
         # print ("execute")
         # print(f"Tension:{self.tension} Iterations:{self.iterations}")
-        if not hasattr(self, "objects") or not self.objects:
+
+        if not self.is_invoked:        
             return self.invoke(context, None)
 
         bpy.ops.object.mode_set(mode='OBJECT')
@@ -116,11 +113,8 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
             self.bias = 0
             #self.min_angle = 0
 
-        result = super(SetEdgeFlowOP, self).invoke(context)
-
-        if "CANCELLED" in result:
-            return  result
-
+        super(SetEdgeFlowOP, self).invoke(context)
+       
         return self.execute(context)
 
 

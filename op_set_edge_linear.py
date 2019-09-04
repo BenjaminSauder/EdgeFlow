@@ -25,10 +25,7 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
     def invoke(self, context, event):
         #print("--------------------")
-        result = super(SetEdgeLinearOP, self).invoke(context)
-
-        if "CANCELLED" in result:
-            return result
+        super(SetEdgeLinearOP, self).invoke(context)
 
         self.do_straighten = self.can_straighten()
         if self.do_straighten:
