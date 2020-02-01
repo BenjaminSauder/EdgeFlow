@@ -36,8 +36,8 @@ class SetEdgeLoopBase():
     def invoke(self, context):
         # print("base invoke")
         self.is_invoked = True
-
-        self.objects = set(context.selected_editable_objects)
+       
+        self.objects = set(context.selected_editable_objects) if context.selected_editable_objects else set([context.object])
         self.bm = {}
         self.edgeloops = {}
         self.vert_positions = {}
