@@ -40,7 +40,6 @@ class Loop():
             #    print("key: ", k.index)
             #    print("value: ", v)
 
-
             # for loop in self.edge_ring[edge]:
             #    str += " = %s " % loop.edge.index
             str += "\n"
@@ -104,9 +103,11 @@ class Loop():
                 # print(loop.edge.index)
                 # print( loop.edge.verts[0].index, loop.edge.verts[1].index )
                 value = (index + 1) * (1.0 / (count + 1))
-                #print(value)
-                result_A = interpolate.hermite_3d(a1.co, a2.co, a3.co, a4.co, value, -tension, 0)
-                result_B = interpolate.hermite_3d(b1.co, b2.co, b3.co, b4.co, value, -tension, 0)
+                # print(value)
+                result_A = interpolate.hermite_3d(
+                    a1.co, a2.co, a3.co, a4.co, value, -tension, 0)
+                result_B = interpolate.hermite_3d(
+                    b1.co, b2.co, b3.co, b4.co, value, -tension, 0)
 
                 loop.edge.verts[0].co = mathutils.Vector(result_A)
                 loop.edge.verts[1].co = mathutils.Vector(result_B)
@@ -156,7 +157,7 @@ class Loop():
         a2 = edge.verts[1]
 
         a1_len = len(a1.link_edges)
-        a2_len =  len(a2.link_edges)
+        a2_len = len(a2.link_edges)
         if a1_len <= 3 or a2_len <= 3:
             return
 
@@ -326,7 +327,8 @@ class Loop():
                 # result = mathutils.geometry.interpolate_bezier(p1, p2, p3, p4, 3)[1]
 
                 # result = interpolate.catmullrom(p1, p2, p3, p4, 1, 3)[1]
-                result = interpolate.hermite_3d(p1, p2, p3, p4, 0.5, -tension, 0)
+                result = interpolate.hermite_3d(
+                    p1, p2, p3, p4, 0.5, -tension, 0)
                 result = mathutils.Vector(result)
                 linear = (p2 + p3) * 0.5
 
