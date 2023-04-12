@@ -1,14 +1,18 @@
 import math
+import time
 import bpy
 from bpy.props import IntProperty, FloatProperty, EnumProperty
 import bmesh
 from . import util
 
+RESET_TO_DEFAULTS_DURATION = 15.0
+time_last_called = time.time()
 
 class SetEdgeLoopBase():
 
     def __init__(self):
         self.is_invoked = False
+        
 
     def get_bm(self, obj):
         bm = bmesh.new()
@@ -36,7 +40,7 @@ class SetEdgeLoopBase():
     def invoke(self, context):
         # print("base invoke")
         self.is_invoked = True
-       
+
         self.objects = set(context.selected_editable_objects) if context.selected_editable_objects else set([context.object])
         self.bm = {}
         self.edgeloops = {}
@@ -102,19 +106,26 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
 
         bpy.ops.object.mode_set(mode='EDIT')
 
+        self.is_invoked = False
+
         return {'FINISHED'}
 
     def invoke(self, context, event):
         # print("invoke")
 
-        if event:
+        super(SetEdgeFlowOP, self).invoke(context)
+     
+        global time_last_called
+
+        print(f" {time.time()} > {time_last_called}")
+        if time.time() > time_last_called + RESET_TO_DEFAULTS_DURATION: 
+            print("reset to defaults")
+            time_last_called = time.time()
             self.tension = 180
             self.iterations = 1
             self.bias = 0
             #self.min_angle = 0
 
-        super(SetEdgeFlowOP, self).invoke(context)
-       
         return self.execute(context)
 
 
