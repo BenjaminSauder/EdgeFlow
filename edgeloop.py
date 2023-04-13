@@ -151,7 +151,10 @@ class Loop():
                     v += vert.co
                     count += 1
 
-            return v / count
+            if count > 0:
+                v /= count
+                
+            return v 
 
         a1 = edge.verts[0]
         a2 = edge.verts[1]
