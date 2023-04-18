@@ -72,47 +72,188 @@ class Loop():
         ring = self.edge_rings[edge]
         return (ring[0], ring[len(ring) - 1])
 
-    def set_curve_flow(self, visited, tension):
+    def set_curve_flow(self, tension):
+        count = len(self.edges)
+        if count < 2:
+            return
 
-        for edge in self.edge_rings:
-            a, b = self.ends[edge]
+        self.bm.verts.ensure_lookup_table()
+        self.bm.edges.ensure_lookup_table()
 
-            if a in visited and b in visited:
-                continue
+        p1, p4 = None, None
 
-            visited.add(a)
-            visited.add(b)
+        #get starting points
+        for p in self.edges[0].verts:
+            if p not in self.edges[1].verts:
+                p1 = p
 
-            a1 = b.link_loop_radial_prev.link_loop_prev.link_loop_prev.vert
-            a2 = b.vert
-            a3 = a.link_loop_radial_prev.vert
-            a4 = a.link_loop_radial_prev.link_loop_prev.vert
+        for p in self.edges[-1].verts:
+            if p not in self.edges[-2].verts:
+                p4 = p
 
-            b1 = b.link_loop_radial_prev.link_loop_prev.vert
-            b2 = b.link_loop_next.vert
-            b3 = a.link_loop_radial_prev.link_loop_next.vert
-            b4 = a.link_loop_radial_prev.link_loop_next.link_loop_next.vert
+        print(f"endpoints: {p1}, {p4}")
 
-            #print(a1.index, a2.index, a3.index, a4.index)
-            #print(b1.index, b2.index, b3.index, b4.index)
+        def print_bm_loop(corner):
+            '''
+            Vert -> head -- Edge -> Tail
+            link_loop_prev => where head points to
+            '''
+            def get_string(corner):
+                return  f"{corner.index} | vert: {corner.vert.index} edge: {corner.edge.index}"
 
-            count = len(self.edge_rings[edge])
-            #print("edges: %s" % count)
+            print("----------------------------")
+            l = corner
+            print("corner:              ", get_string(l))
+            l = corner.link_loop_next
+            print("link_loop_next       ", get_string(l))
+            l = corner.link_loop_prev
+            print("link_loop_prev       ", get_string(l))
+            l = corner.link_loop_radial_next
+            print("link_loop_radial_next", get_string(l))
+            l = corner.link_loop_radial_prev
+            print("link_loop_radial_prev", get_string(l))
+            print("----------------------------")
 
-            for index, loop in enumerate(self.edge_rings[edge]):
-                # print(loop.edge.index)
-                # print( loop.edge.verts[0].index, loop.edge.verts[1].index )
-                value = (index + 1) * (1.0 / (count + 1))
-                # print(value)
-                result_A = interpolate.hermite_3d(
-                    a1.co, a2.co, a3.co, a4.co, value, -tension, 0)
-                result_B = interpolate.hermite_3d(
-                    b1.co, b2.co, b3.co, b4.co, value, -tension, 0)
 
-                loop.edge.verts[0].co = mathutils.Vector(result_A)
-                loop.edge.verts[1].co = mathutils.Vector(result_B)
 
-        return visited
+        def find_direction(point, edge):   
+            if len(point.link_edges) == 2:    
+                # |_ corner case with mesh borders            
+                a = point.link_edges[0].other_vert(point).co - point.co
+                b = point.link_edges[1].other_vert(point).co - point.co
+              
+                # if a is edge
+                if point.link_edges[0] == edge:
+                    c = a.cross(b)                    
+                    d = c.cross(b)
+                # if b is edge
+                else:
+                    c = b.cross(a)
+                    d = c.cross(a)
+                    
+                return -d.normalized()
+               
+            elif len(point.link_edges) == 3:  
+                original_corner = point.link_loops[0]
+                for corner in point.link_loops:              
+                    if corner.vert == point and corner.edge == edge:
+                        original_corner = corner
+                
+                # edge is at an 'end'
+                # _|_
+                if len(edge.link_faces) == 2:     
+                    a = edge.other_vert(point).co - point.co
+                    n = edge.link_loops[0].face.normal + edge.link_loops[1].face.normal
+                    n = n.normalized()
+                    c = a.cross(n)
+                    c = c.cross(-n)
+                    return c.normalized()               
+                else:
+                    # |_
+                    # |
+                    # search for the edge which is not neighbouring 
+                    # to the face connected to the input edge
+                    for e in point.link_edges:
+                        is_connected_to_end_edge = False
+                        for f in e.link_faces:
+                            if f in edge.link_faces:                                
+                                is_connected_to_end_edge = True
+                                break                     
+
+                        if not is_connected_to_end_edge: 
+                            b = e.other_vert(point)
+                            break
+
+                    a = point
+                    c = a.co - b.co
+                    return c.normalized()
+
+            elif len(point.link_edges) == 4:    
+                # regular quad case
+                # _|_
+                #  |  
+                for corner in edge.link_loops:
+                    if corner.vert == point:
+                        a = point
+                        b = corner.link_loop_prev.link_loop_radial_prev.link_loop_prev.vert
+                        c = a.co - b.co
+                        return c.normalized()                        
+            else:                
+                a = edge.other_vert(point).co - point.co
+                n = edge.link_loops[0].face.normal + edge.link_loops[1].face.normal
+                n = n.normalized()
+                c = a.cross(n)
+                c = c.cross(n)
+                return -c.normalized()         
+        
+        dir1 = find_direction(p1, self.edges[0])
+        dir2 = find_direction(p4, self.edges[-1])
+        # return
+
+        start_vert = p1
+
+        p1 = p1.co
+        p4 = p4.co
+
+        scale = (p1 - p4).length * 0.5
+        scale *= tension
+
+        # p2 = p1 - (dir1 * scale)
+        # p3 = p4 - (dir2 * scale)
+
+        p2 = p1 + (dir1 * scale)
+        p3 = p4 + (dir2 * scale)
+
+        add_debug_verts = False
+        if add_debug_verts:
+            # bmesh.ops.create_vert(self.bm, co=p1)
+            # bmesh.ops.create_vert(self.bm, co=p4)
+            bmesh.ops.create_vert(self.bm, co=p2)
+            bmesh.ops.create_vert(self.bm, co=p3)
+       
+        bias = 0
+        spline_points = []
+        precision = 1000
+
+        # knot1, handle1, handle2, knot2, resolution)
+      
+        spline_points = mathutils.geometry.interpolate_bezier(p1, p2, p3, p4, precision)
+
+        # for i in range(precision):
+        #     mu = i / float(precision)
+
+        #     spline_pos = interpolate.hermite_3d(p2, p1, p4, p3, mu, -tension, bias)
+        #     # if add_debug_verts:
+        #     #     bmesh.ops.create_vert(self.bm, co=spline_pos)
+        #     spline_points.append(mathutils.Vector(spline_pos))
+
+        total_lenght = 0
+        for index in range(1, len(spline_points)):
+            total_lenght += (spline_points[index] - spline_points[index-1]).magnitude
+
+
+        segment_length = total_lenght /  float(len(self.edges))
+        # print(total_lenght, segment_length)
+        current_point = start_vert
+        current_edge_index = 0
+        current_length = 0
+
+        for index in range(1, len(spline_points)):
+            current_length += (spline_points[index] - spline_points[index-1]).magnitude
+            
+            if current_length > segment_length:                
+                current_length = 0
+                position = spline_points[index]
+
+                e = self.edges[current_edge_index]
+                current_point = e.other_vert(current_point)  
+                current_point.co = position      
+
+                current_edge_index += 1
+
+                if current_edge_index == len(self.edges)-1:
+                    break
+                
 
     def get_average_distance(self):
         dist = 0
@@ -121,6 +262,19 @@ class Loop():
         return dist / float(len(self.edges))
 
     def straighten(self, distance):
+        '''
+        this makes takes the end points of an edge and places them even distanced to the 'next' vert in the extension of the edge loop
+        
+        Moves A and B:
+
+        A' ------ A - B -- B' 
+    
+        to:
+
+        A' --- A --- B --- B'
+        '''
+
+        
         edge = self.edges[0]
 
         def find_neighbour(p):

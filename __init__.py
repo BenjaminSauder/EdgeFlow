@@ -20,6 +20,7 @@ if "bpy" in locals():
     importlib.reload(interpolate)
     importlib.reload(op_set_edge_flow)
     importlib.reload(op_set_edge_linear)
+    importlib.reload(op_set_edge_curve)
     importlib.reload(op_set_vertex_curve)
 else:
     from . import (
@@ -29,6 +30,7 @@ else:
         edgeloop,
         op_set_edge_flow,
         op_set_edge_linear,
+        op_set_edge_curve,
         op_set_vertex_curve,
     )
 
@@ -47,6 +49,7 @@ def menu_func_edges(self, context):
     layout.operator_context = "INVOKE_DEFAULT"
 
     layout.operator(op_set_edge_flow.SetEdgeFlowOP.bl_idname, text='Set Flow')
+    layout.operator(op_set_edge_curve.SetEdgeCurveOP.bl_idname, text='Set Curve')
     layout.operator(op_set_edge_linear.SetEdgeLinearOP.bl_idname, text='Set Linear')
 
 def menu_func_vertices(self, context):
@@ -68,6 +71,7 @@ class VIEW3D_MT_edit_mesh_set_flow(Menu):
           layout.operator(op_set_vertex_curve.SetVertexCurveOp.bl_idname, text='Set Vertex Curve')
         elif mesh_select_mode == (False, True, False):
             layout.operator(op_set_edge_flow.SetEdgeFlowOP.bl_idname, text='Set Flow')
+            layout.operator(op_set_edge_curve.SetEdgeCurveOP.bl_idname, text='Set Curve')
             layout.operator(op_set_edge_linear.SetEdgeLinearOP.bl_idname, text='Set Linear')
 
 def menu_func_context_menu(self, context):
@@ -82,6 +86,7 @@ def menu_func_context_menu(self, context):
 classes = [
     op_set_edge_flow.SetEdgeFlowOP,
     op_set_edge_linear.SetEdgeLinearOP,
+    op_set_edge_curve.SetEdgeCurveOP,
     op_set_vertex_curve.SetVertexCurveOp,
     VIEW3D_MT_edit_mesh_set_flow,
 ]
