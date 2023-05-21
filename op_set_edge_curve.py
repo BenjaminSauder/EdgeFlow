@@ -14,7 +14,9 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "adjust edge loops to curvature"
 
-    tension : IntProperty(name="Tension", default=100, soft_min=-500, soft_max=500)
+    tension : IntProperty(name="Tension", default=100, soft_min=-500, soft_max=500, description="Tension can be used to tighten up the curvature")
+    mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, description="Interpolate between inital position and the calculated end position")
+
   
     def execute(self, context):
         # print ("execute")
@@ -28,7 +30,7 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
         for obj in self.objects:            
             for edgeloop in self.edgeloops[obj]:
-                edgeloop.set_curve_flow(self.tension / 100.0)
+                edgeloop.set_curve_flow(self.tension / 100.0, self.mix)
 
             self.bm[obj].to_mesh(obj.data)
 
@@ -45,7 +47,8 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
         if time.time() > time_last_called + op_set_edge_flow.RESET_TO_DEFAULTS_DURATION: 
             time_last_called = time.time()
-            self.tension = 100          
+            self.tension = 100
+            self.mix = 1.0          
 
 
         return self.execute(context)

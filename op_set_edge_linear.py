@@ -12,7 +12,7 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "makes edge loops linear"
 
-    space_evenly : BoolProperty(name="Space evenly", default=False)
+    space_evenly : BoolProperty(name="Space evenly", default=False, description="Spread the vertices in even distances")
     # distance : FloatProperty(name="Distance", default=1.0, min=0)
 
     def draw(self, context):

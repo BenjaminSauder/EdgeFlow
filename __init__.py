@@ -3,9 +3,9 @@ bl_info = {
     "category": "Mesh",
     "author": "Benjamin Sauder",
     "description": "helps adjusting geometry to curved surfaces",
-    "version": (0, 6),
+    "version": (0, 7),
     "location": "Mesh > Edge > Set Edge Flow",
-    "blender": (2, 93, 0),
+    "blender": (3, 5, 1),
     "tracker_url": "https://github.com/BenjaminSauder/EdgeFlow/issues",
     "wiki_url": "https://github.com/BenjaminSauder/EdgeFlow" ,
 }
@@ -38,9 +38,6 @@ else:
 
 import bpy
 from bpy.types import Menu
-
-
-
 
 
 def menu_func_edges(self, context):

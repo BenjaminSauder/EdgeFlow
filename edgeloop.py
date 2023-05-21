@@ -72,7 +72,7 @@ class Loop():
         ring = self.edge_rings[edge]
         return (ring[0], ring[len(ring) - 1])
 
-    def set_curve_flow(self, tension):
+    def set_curve_flow(self, tension, mix):
         count = len(self.edges)
         if count < 2:
             return
@@ -247,7 +247,7 @@ class Loop():
 
                 e = self.edges[current_edge_index]
                 current_point = e.other_vert(current_point)  
-                current_point.co = position      
+                current_point.co = current_point.co.lerp(position, mix)      
 
                 current_edge_index += 1
 
@@ -364,7 +364,7 @@ class Loop():
 
             last_vert = vert
 
-    def set_flow(self, tension, min_angle):
+    def set_flow(self, tension, min_angle, mix):
         visited = set()
 
         for edge in self.edges:
@@ -489,5 +489,5 @@ class Loop():
                 result = mathutils.Vector(result)
                 linear = (p2 + p3) * 0.5
 
-                vert.co = result
+                vert.co = vert.co.lerp(result, mix)
                 # vert.co = linear.lerp(curved, tension)

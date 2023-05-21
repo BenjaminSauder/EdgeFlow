@@ -394,9 +394,9 @@ class SetVertexCurveOp(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Curves vertices between selected vertices"
   
-    tension : IntProperty(name="Tension", default=0, min=-500, max=500)
+    tension : IntProperty(name="Tension", default=0, min=-500, max=500, description="Tension can be used to tighten up the curvature")
     #TODO space_evenly: BoolProperty(name="Space vertices evenly", default=False)
-    use_topology_distance : BoolProperty(name="Edge Distance", default=False) 
+    use_topology_distance : BoolProperty(name="Edge Distance", default=False , description="Use the edge count instead of edge lengths for distance measure") 
 
     @classmethod
     def poll(cls, context):
@@ -449,6 +449,7 @@ class SetVertexCurveOp(bpy.types.Operator):
             # print("set to default")
             self.tension = 0
             self.use_topology_distance = False
+            
         
         self.obj = context.object               
         return self.execute(context)
