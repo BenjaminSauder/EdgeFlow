@@ -78,3 +78,61 @@ def hermite_3d(p1, p2, p3, p4, mu, tension, bias):
     z = hermite_1d(p1[2], p2[2], p3[2], p4[2], mu, tension, bias)
 
     return [x, y, z]
+
+
+# ----------------------------------------------------------------------
+# Blending towards the end points.
+# ----------------------------------------------------------------------
+
+def setBlendValues(loopVerts, blendVerts, count, start=True):
+    """Set the blending values for all vertices of the given edge loop.
+
+    :param loopVerts: The list of loop vertices.
+    :type loopVerts: list(bmesh.types.BMVert)
+    :param blendVerts: The dictionary of loop vertices and their
+                       blending values.
+                       This dictionary gets mutated.
+    :type blendVerts: dict
+    :param count: The number of vertices to blend.
+    :type count: int
+    :param start: True, if the blending is calculated for the start of
+                  the loop.
+    :type start: bool
+    """
+    # Get the overall loop length.
+    totalLength = 0
+
+    if not start:
+        loopVerts.reverse()
+
+    partials = [0]
+    for i in range(count):
+        i = min(i, len(loopVerts) - 2)
+        length = (loopVerts[i + 1].co - loopVerts[i].co).length
+        totalLength += length
+        partials.append(totalLength)
+
+    for i in range(count):
+        value = partials[i] / totalLength
+        blendVerts[loopVerts[i].index] = value
+
+
+def blendValue(value, strength, blendType):
+    """Blend the given value depending on the interpolation type.
+
+    :param value: The value to blend.
+    :type value: float
+    :param strength: The strength of the blending.
+    :type strength: float
+    :param blendType: The curve type used for blending.
+    :type blendType: str
+
+    :return: The interpolated value.
+    :rtype: float
+    """
+    value = max(0.0, min(1.0, value))
+
+    if blendType == "SMOOTH":
+        return value * value * (3 - 2 * value) * strength
+    else:
+        return value * strength

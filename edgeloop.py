@@ -364,8 +364,52 @@ class Loop():
 
             last_vert = vert
 
-    def set_flow(self, tension, min_angle, mix):
+    def set_flow(self, obj, tension, min_angle, mix, blend_start, blend_end, blend_type):
+
+        # --------------------------------------------------------------
+        # Get the loop vertices and calculate the start and end
+        # blending.
+        # --------------------------------------------------------------
+
+        # Get the start and end vertices of the selected loop.
+        loopStart = self.getStartVertices()
+        loopData = None
+        # If loop start data has been found get all vertices of the loop
+        # for blending the end points.
+        if loopStart:
+            loopData = getOrderedLoopVerts(obj, loopStart)
+
+        # Create the dictionary with the blend values for the loop
+        # vertices.
+        blendVerts = {}
+        if loopData:
+            for loopVerts in loopData:
+                count = len(loopVerts)
+                for i in range(count):
+                    blendVerts[loopVerts[i].index] = 1.0
+
+                if blend_start + blend_end >= count:
+                    if blend_start < blend_end:
+                        blend_end = max(count - blend_start - 1, 0)
+                    elif blend_end < blend_start:
+                        blend_start = max(count - blend_end - 1, 0)
+                    else:
+                        midCount = math.floor(count / 2)
+                        blend_start = count - midCount
+                        blend_end = count - blend_start
+
+                if blend_start > 0:
+                    interpolate.setBlendValues(loopVerts, blendVerts, blend_start, start=True)
+                if blend_end > 0:
+                    interpolate.setBlendValues(loopVerts, blendVerts, blend_end, start=False)
+
+        # --------------------------------------------------------------
+        # Surface calculation.
+        # --------------------------------------------------------------
+
         visited = set()
+
+        processedVerts = set()
 
         for edge in self.edges:
             target = {}
@@ -487,7 +531,149 @@ class Loop():
                 result = interpolate.hermite_3d(
                     p1, p2, p3, p4, 0.5, -tension, 0)
                 result = mathutils.Vector(result)
-                linear = (p2 + p3) * 0.5
+                # linear = (p2 + p3) * 0.5
 
-                vert.co = vert.co.lerp(result, mix)
+                # The previously used lerp function to multiply the
+                # result is replaced by the end point blending which
+                # includes the multiplying part.
+                # vert.co = vert.co.lerp(result, mix)
                 # vert.co = linear.lerp(curved, tension)
+
+                # ------------------------------------------------------
+                # Blend the end points.
+                # ------------------------------------------------------
+                if vert.index not in processedVerts:
+                    if vert.index in blendVerts:
+                        value = interpolate.blendValue(blendVerts[vert.index], mix, blend_type)
+                        vert.co = vert.co.lerp(result, value)
+                    else:
+                        vert.co = vert.co.lerp(result, mix)
+
+                processedVerts.add(vert.index)
+
+    def getStartVertices(self):
+        """Return a list of tuples, containing the start edge and vertex
+        indicating an edge loop.
+
+        :return: A list of tuples with the start edge and vertex of an
+                 edge loop.
+        :rtype: list(tuple(bmesh.types.BMEdge, bmesh.types.BMVert))
+        """
+        verts = set()
+        for edge in self.edges:
+            for loop in edge.link_loops:
+                connectedEdges = loop.vert.link_edges
+                selectedCount = 0
+                for connected in connectedEdges:
+                    if connected.select:
+                        selectedCount += 1
+                if selectedCount == 1:
+                    verts.add((edge, loop.vert))
+        return verts
+
+
+# ----------------------------------------------------------------------
+# Custom function to get the selected loop edges in the correct order.
+#
+# This most likely overlaps with existing functionality and might make
+# refactoring necessary. But it shouldn't affect performance too much.
+# ----------------------------------------------------------------------
+
+def getOrderedLoopVerts(obj, edges):
+    """Return a list with all edge loop vertices for each given edge.
+
+    :param obj: The mesh object.
+    :type obj: bpy.types.Object
+    :param edges: The list of start edges and vertices for a selected
+                  edge loop.
+    :type edges: list(tuple(bmesh.types.BMEdge, bmesh.types.BMVert))
+
+    :return: A list of loops, each containing a list of vertices of each
+             edge loop.
+    :rtype: list(list(bmesh.types.BMVert))
+    """
+    # In order to get the current selection history it's necessary to
+    # get the bmesh from the current edit mesh.
+    bpy.ops.object.mode_set(mode='EDIT')
+    bm = bmesh.from_edit_mesh(obj.data)
+
+    # Validate and get the selection history.
+    bm.select_history.validate()
+    history = bm.select_history.active
+
+    visitedEdges = set()
+    loops = []
+
+    for edge, vertex in edges:
+        # Mark the current edge as visited so that it's only processed
+        # once.
+        visitedEdges.add(edge.index)
+
+        # If the start vertex is contained in any of the previously
+        # collected loops, processing this vertex is not necessary since
+        # it can be considered the end point of an already processed
+        # oop.
+        if any(vertex in loop for loop in loops):
+            continue
+
+        loopVerts = []
+        loopEnd = False
+
+        # Go over all connected edges to collect the loop vertices.
+        while not loopEnd:
+            # Add the first vertex of the current edge.
+            loopVerts.append(vertex)
+            # Get the faces connected to the current edge.
+            # The next edge in the loop should be connected to different
+            # faces.
+            edgeFaces = [face.index for face in edge.link_faces]
+            # Get the other vertex of the edge to get the connected
+            # edges.
+            vertex = edge.other_vert(vertex)
+            connectedEdges = vertex.link_edges
+
+            nextEdge = False
+
+            # Go over the connected edges and check it one is selected.
+            # Already visited edges can be skipped.
+            for e in connectedEdges:
+                if e.select and e.index not in visitedEdges:
+                    # Get the connected faces. These should be unique
+                    # from the previous edge.
+                    connectedFaces = e.link_faces
+                    if not any(face.index in edgeFaces for face in connectedFaces):
+                        # Mark the edge as visited.
+                        visitedEdges.add(e.index)
+                        # The next edge is the current one.
+                        edge = e
+                        # Continue.
+                        nextEdge = True
+            # If there is no next edge add the last vertex to the list.
+            if not nextEdge:
+                loopVerts.append(vertex)
+                loopEnd = True
+
+        # Check for the order of vertices depending on the selected
+        # edge.
+        if history:
+            index = None
+            if isinstance(history, bmesh.types.BMVert):
+                index = history.index
+            elif isinstance(history, bmesh.types.BMEdge):
+                index = history.verts[0].index
+
+            # If the active vertex is contained in the loop list but not
+            # located at the start of the list, reverse the index list.
+            if index is not None:
+                indices = [v.index for v in loopVerts]
+                if index in indices:
+                    indexPos = indices.index(index)
+                    if indexPos > 1:
+                        loopVerts.reverse()
+
+        # Add the list of vertices for the loop.
+        loops.append(loopVerts)
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+    return loops

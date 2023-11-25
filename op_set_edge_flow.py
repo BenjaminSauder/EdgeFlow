@@ -78,13 +78,19 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     bl_idname = "mesh.set_edge_flow"
     bl_label = "Set edge flow"
     bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "adjust edge loops to curvature"
+    bl_description = "Adjust edge loops to match surface curvature"
 
+    curveItems = (("LINEAR", "Linear", ""),
+                  ("SMOOTH", "Smooth", ""))
+
+    mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, description="Interpolate between inital position and the calculated end position")
+    blend_start: bpy.props.IntProperty(name="Blend Start", default=0, min=0, description="The number of vertices from the start of the loop used to blend to the adjusted loop position")
+    blend_end: bpy.props.IntProperty(name="Blend End", default=0, min=0, description="The number of vertices from the end of the loop used to blend to the adjusted loop position")
+    blend_type: bpy.props.EnumProperty(name="Blend Curve", items=curveItems, description="The interpolation used to blend between the adjusted loop position and the unaffected start and/or end points")
     tension : IntProperty(name="Tension", default=180, min=-500, max=500, description="Tension can be used to tighten up the curvature")
     iterations : IntProperty(name="Iterations", default=1, min=1, soft_max=32, description="How often the curveature operation is repeated")
     #bias = IntProperty(name="Bias", default=0, min=-100, max=100)
     min_angle : IntProperty(name="Min Angle", default=0, min=0, max=180, subtype='FACTOR', description="After which angle the edgeloop curvature is ignored")
-    mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, description="Interpolate between inital position and the calculated end position")
 
 
     def execute(self, context):
@@ -101,7 +107,13 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
         for obj in self.objects:
             for i in range(self.iterations):
                 for edgeloop in self.edgeloops[obj]:
-                    edgeloop.set_flow(self.tension / 100.0, math.radians(self.min_angle), self.mix )
+                    edgeloop.set_flow(obj=obj,
+                                      tension=self.tension / 100.0,
+                                      min_angle=math.radians(self.min_angle),
+                                      mix=self.mix,
+                                      blend_start=self.blend_start,
+                                      blend_end=self.blend_end,
+                                      blend_type=self.blend_type)
 
             self.bm[obj].to_mesh(obj.data)
 
@@ -127,8 +139,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
             self.bias = 0
             self.mix = 1.0
             #self.min_angle = 0
+            self.blend_start = 0
+            self.blend_end = 0
 
         return self.execute(context)
-
-
-
