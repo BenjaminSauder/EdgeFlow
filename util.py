@@ -121,6 +121,9 @@ def walk_edge_loop(start_edge, limit_to_edges=None):
                 if valence == 4 and start_valence == valence:
                     loop = loop.link_loop_prev.link_loop_radial_prev.link_loop_prev
 
+                    if loop.edge in edge_loop:
+                        break
+
                     if limit_to_edges != None:
                         if loop.edge in limit_to_edges:
                             add(loop.edge)
@@ -159,7 +162,6 @@ def get_edgeloop(bm, start_edge, limit_to_edges=None):
 
     if is_ngon and not quad_flow and not loop_end:
         return edgeloop.Loop(bm, walk_ngon(start_edge, limit_to_edges))
-
     elif start_edge.is_boundary:
         return edgeloop.Loop(bm, walk_boundary(start_edge, limit_to_edges))
     else:
