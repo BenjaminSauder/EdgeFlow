@@ -11,10 +11,31 @@ class Loop():
         self.bm = bm
         self.edges = edges
 
-        self.verts = set()
-        for e in self.edges:
-            for v in e.verts:
-                self.verts.add(v)
+        #ordered verts of this loop
+        self.verts = []        
+        if len(self.edges) > 1:
+            last_vert = None
+            for p in self.edges[0].verts:
+                if p not in self.edges[1].verts:
+                    last_vert = p
+
+            self.verts.append(last_vert)
+            for i in range(len(self.edges)):                
+                vert = self.edges[i].other_vert(last_vert)     
+                self.verts.append(vert)
+                last_vert = vert
+        else:
+            self.verts = [self.edges[0].verts[0], self.edges[0].verts[1]]
+
+        # make sure start vert stays 'stable'         
+        if self.verts[0].co.x + self.verts[0].co.y + self.verts[0].co.z < self.verts[-1].co.x + self.verts[-1].co.y + self.verts[-1].co.z:
+            self.verts.reverse()
+            self.edges.reverse()
+
+        #store intial vertex coordinates      
+        self.initial_vert_positions = []
+        for i, v in enumerate(self.verts):
+            self.initial_vert_positions.append(v.co.copy())
 
         # print("edgeloop length: %s" % len(self.edges))
         self.valences = []
@@ -91,7 +112,7 @@ class Loop():
             if p not in self.edges[-2].verts:
                 p4 = p
 
-        print(f"endpoints: {p1}, {p4}")
+        #print(f"endpoints: {p1}, {p4}")
 
         def print_bm_loop(corner):
             '''
@@ -113,8 +134,6 @@ class Loop():
             l = corner.link_loop_radial_prev
             print("link_loop_radial_prev", get_string(l))
             print("----------------------------")
-
-
 
         def find_direction(point, edge):   
             if len(point.link_edges) == 2:    
@@ -211,7 +230,7 @@ class Loop():
             bmesh.ops.create_vert(self.bm, co=p2)
             bmesh.ops.create_vert(self.bm, co=p3)
        
-        bias = 0
+      
         spline_points = []
         precision = 1000
 
@@ -219,6 +238,7 @@ class Loop():
       
         spline_points = mathutils.geometry.interpolate_bezier(p1, p2, p3, p4, precision)
 
+        # bias = 0
         # for i in range(precision):
         #     mu = i / float(precision)
 
@@ -330,6 +350,7 @@ class Loop():
         a1.co = b1 + distance * direction
         a2.co = b2 - distance * direction
 
+
     def set_linear(self, even_spacing):
 
         count = len(self.edges)
@@ -364,22 +385,73 @@ class Loop():
 
             last_vert = vert
 
-    def set_flow(self, tension, min_angle, mix):
-        visited = set()
 
+    def blend_start_end(self, blend_start, blend_end, blend_type):
+
+        count = len(self.verts)
+        start_count = round(count * blend_start)
+        end_count = round(count * blend_end)
+
+        if start_count + end_count >= count:
+            if start_count < end_count:
+                end_count = max(count - start_count - 1, 0)
+            elif end_count < start_count:
+                start_count = max(count - end_count - 1, 0)
+            else:
+                midCount = math.floor(count / 2)
+                start_count = count - midCount
+                end_count = count - start_count
+                
+        #print(f"start:{blend_start} - end:{blend_end} - vertcount: {count}")
+        #print(f"start_count:{start_count} - end_count:{end_count} - count: {count}")
+      
+        def apply_blend(blend_range, reverse):
+            indices = list(range(count))          
+            if reverse:
+                indices.reverse()
+
+            distances = [0]
+            total_length = 0
+          
+            for i in range(1, blend_range+1):               
+                a = self.verts[indices[i]]
+                b = self.verts[indices[i-1]]
+                length = (a.co - b.co).length
+                total_length += length
+                distances.append(total_length)
+
+            # print(f"total length: {total_length} - number of distances: {len(distances)}")
+          
+            if total_length == 0:
+                return
+ 
+            for i in range(blend_range+1):
+                blend_value = distances[i] / total_length                
+            
+                if blend_type == 'SMOOTH':
+                    blend_value = interpolate.smooth_step(0.0, 1.0, blend_value)
+
+                vert = self.verts[indices[i]]
+                intital_position = self.initial_vert_positions[indices[i]] 
+                vert.co = intital_position.lerp(vert.co, blend_value)
+
+        if blend_start > 0:
+            apply_blend(min(count-1, start_count), reverse=False)
+        if blend_end > 0:
+            apply_blend(min(count-1, end_count), reverse=True)
+
+
+    def set_flow(self, tension, min_angle):
+     
         for edge in self.edges:
             target = {}
 
             if edge.is_boundary:
                 continue
 
-            for loop in edge.link_loops:
-                if loop in visited:
-                    continue
-
+            for loop in edge.link_loops:              
                 # todo check triangles/ngons?
 
-                visited.add(loop)
                 ring1 = loop.link_loop_next.link_loop_next
                 ring2 = loop.link_loop_radial_prev.link_loop_prev.link_loop_prev
 
@@ -396,15 +468,8 @@ class Loop():
 
                 result = []
                 if not ring1.edge.is_boundary:
-                    is_quad = len(ring1.face.verts) == 4
-                    # if is_quad:
+                    
                     final = ring1.link_loop_radial_next.link_loop_next
-
-                    # else:
-                    #    final = ring1
-
-                    #print("is_quad:", is_quad, " - ", final.edge.index)
-
                     a, b = final.edge.verts
                     if p2 == a:
                         p1 = b.co
@@ -419,7 +484,6 @@ class Loop():
                     if angle < min_angle:
                         # print("r1: %s" % (math.degrees(angle)))
                         p1 = p2.co - (p3.co - p2.co) * 0.5
-
                         # bmesh.ops.create_vert(self.bm, co=p1)
 
                 else:
@@ -479,15 +543,11 @@ class Loop():
 
                 p1 = p2 + (d * (p1 - p2).normalized())
                 p4 = p3 + (d * (p4 - p3).normalized())
-
-                # print("p1: %s\np2:%s\np3: %s\np4:%s\n1" % (p1, p2, p3, p4))
-                # result = mathutils.geometry.interpolate_bezier(p1, p2, p3, p4, 3)[1]
-
+              
                 # result = interpolate.catmullrom(p1, p2, p3, p4, 1, 3)[1]
-                result = interpolate.hermite_3d(
-                    p1, p2, p3, p4, 0.5, -tension, 0)
-                result = mathutils.Vector(result)
-                linear = (p2 + p3) * 0.5
+                result = interpolate.hermite_3d(p1, p2, p3, p4, 0.5, -tension, 0)
+                result = mathutils.Vector(result)                
+                vert.co = result
+ 
+            
 
-                vert.co = vert.co.lerp(result, mix)
-                # vert.co = linear.lerp(curved, tension)

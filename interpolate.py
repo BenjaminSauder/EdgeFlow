@@ -78,3 +78,22 @@ def hermite_3d(p1, p2, p3, p4, mu, tension, bias):
     z = hermite_1d(p1[2], p2[2], p3[2], p4[2], mu, tension, bias)
 
     return [x, y, z]
+
+
+def smooth_step(a, b, x):
+    '''
+    Perform Hermite interpolation between two values
+    '''
+
+    value = clamp((x - a) / (b - a))    
+    return value * value * (3 - 2 * value)
+    
+    
+def clamp(x, lowerlimit = 0.0, upperlimit = 1.0):
+    '''
+    Constrain a value to lie between two further values
+    '''
+    if (x < lowerlimit): return lowerlimit
+    if (x > upperlimit): return upperlimit
+    return x
+
