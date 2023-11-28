@@ -110,7 +110,10 @@ def map_segment_onto_spline(segment, positions):
 
 def curve_hermite(bm, selected, vert_path, tension):
     knots, segments = split_vert_path_into_segments(bm, selected, vert_path)
-
+    
+    if len(knots) == 1:                
+        return 1, 'Path found is too short - try toggling "Edge Distance"'
+  
     for index, segment in enumerate(segments):
         is_start = index == 0
         is_end = index == len(segments)-1
@@ -169,6 +172,8 @@ def curve_hermite(bm, selected, vert_path, tension):
             spline_points.append(mathutils.Vector(spline_pos))
 
         map_segment_onto_spline(segment, spline_points)
+
+    return 0, ""
 
 
 def curve_bezier(bm, selected, vert_path):
@@ -281,7 +286,9 @@ def curve_bezier(bm, selected, vert_path):
 #            if index != 0 and index != len(segment)-1:
 #                v.co = positions[index]
 
-        print("." * 66)
+        # print("." * 66)
+        return 0
+
 
 
 def circle_3_points(bm, selected, vert_path, tension):
@@ -333,6 +340,8 @@ def circle_3_points(bm, selected, vert_path, tension):
         interpolated = interpolated.normalized() * radius
 
         vert.co = interpolated + center
+    
+    return 0, ""
 
 
 def circle_2_points(bm, selected, vert_path, tension):
@@ -358,8 +367,8 @@ def circle_2_points(bm, selected, vert_path, tension):
             n = (corner.link_loop_next.vert.co - vert_a.co).normalized()
             break 
 
-    n = n.cross(c-a).normalized()
-
+    #n = n.cross(c-a).normalized()
+    n = -n
     # n = (vert_a.normal + vert_b.normal).normalized()
     b = center + n * radius
 
@@ -378,6 +387,7 @@ def circle_2_points(bm, selected, vert_path, tension):
 
     map_segment_onto_spline(vert_path, positions)
 
+    return 0, ""
 
 '''
 
@@ -385,17 +395,20 @@ OPERATOR
 
 '''
 
-last_run = 0
-
 
 class SetVertexCurveOp(bpy.types.Operator):
     bl_idname = "mesh.align_vertex_curve"
     bl_label = "Align vertices to curve defined by selected vertices."
     bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "Curves vertices between selected vertices"
-  
+    bl_description = '''Curves vertices between the selected vertices in picking order of the selected vertices.
+    2 vertices selected: placed on a half circle between endpoints.
+    3 vertices selected: placed onto a circle segment between endpoints.
+    4+ vertices selected: placed onto a spline going through selected vertices
+
+    ALT: reuse last settings
+    '''
+
     tension : IntProperty(name="Tension", default=0, min=-500, max=500, description="Tension can be used to tighten up the curvature")
-    #TODO space_evenly: BoolProperty(name="Space vertices evenly", default=False)
     use_topology_distance : BoolProperty(name="Edge Distance", default=False , description="Use the edge count instead of edge lengths for distance measure") 
 
     @classmethod
@@ -409,7 +422,6 @@ class SetVertexCurveOp(bpy.types.Operator):
             return mesh_select_mode == (True, False, False)
         else:
             return False
-
 
     def get_bm(self, me):
         bm = bmesh.from_edit_mesh(me)
@@ -443,14 +455,11 @@ class SetVertexCurveOp(bpy.types.Operator):
 
     def invoke(self, context, event):
         # print ("-" * 66)
-
-        # fall back to defaul values after 30 seconds, since the last invoke call
-        if time.time() > last_run + 30:
-            # print("set to default")
+       
+        if event and not event.alt:       
             self.tension = 0
             self.use_topology_distance = False
-            
-        
+                    
         self.obj = context.object               
         return self.execute(context)
 
@@ -468,15 +477,15 @@ class SetVertexCurveOp(bpy.types.Operator):
         tension = self.tension / 100.0
         
         if len(selected) == 2:            
-            circle_2_points(bm, selected, vert_path, tension)
+            result, msg = circle_2_points(bm, selected, vert_path, tension)
         elif len(selected) == 3:
-            circle_3_points(bm, selected, vert_path, tension)
+            result, msg = circle_3_points(bm, selected, vert_path, tension)
         else:           
-            curve_hermite(bm, selected, vert_path, tension)
-     
-        self.update_mesh(bm, vert_path)
+            result, msg = curve_hermite(bm, selected, vert_path, tension)
 
-        global last_run
-        last_run = time.time()
+        if result > 0:
+            self.report({'INFO'}, msg)
+
+        self.update_mesh(bm, vert_path)
 
         return {'FINISHED'}
