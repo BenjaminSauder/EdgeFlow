@@ -389,9 +389,9 @@ class Loop():
     def blend_start_end(self, blend_start, blend_end, blend_type):
 
         count = len(self.verts)
-        start_count = round(count * blend_start)
-        end_count = round(count * blend_end)
-
+        start_count = blend_start
+        end_count = blend_end
+      
         if start_count + end_count >= count:
             if start_count < end_count:
                 end_count = max(count - start_count - 1, 0)
