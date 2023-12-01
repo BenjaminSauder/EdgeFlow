@@ -54,11 +54,11 @@ In this example the control points for the spline smoothing are around the corne
 ![MIn_Angle_Demo](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Min_Angle_Demo.jpg)
 
 
-#### How it works
+#### How Set Flow works
 
 Back when I first got to see this in action I did quite not understand how it all worked - so I thought i might be well worth adding a quick description to better understand how the underlaying mechanics work.
+(![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/c7875b5a-1f8f-407a-a05f-2f0705ac4cf3))
 
-![Shema](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Shema.jpg)
 
 The tool goes over each edge from an edgeloop, and then goes over each vert for this edge. For every vert it searches the points C1-C4 which are used as 'control points' for the spline interpolation - quite similar to how every vector drawing programm works.
 So its all depending on the surrounding geometry - which also means if we have multiple neighbouring edgeloops they all influence each other once we start applying this smoothing. Doing the same operation a few times helps to balance it all out and  converges quickly into something stable after a few iterations - so hence the need for such an option.
