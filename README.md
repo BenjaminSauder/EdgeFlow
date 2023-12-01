@@ -42,7 +42,8 @@ Master is now the 2.8 version! if you need the 2.7 version go to the blender_27 
 ## Set edge flow
 
 This operator has three options to play with:
-
+#### Mix:
+Blend between intial vertex positions and the interpolated result
 #### Tension: 
 Controls the strengh of offset 
 #### Iterations: 
@@ -51,13 +52,26 @@ How often the operation will be repeated
 Cut off angle of the smoothing. Falls back to a linearely extrapolated position if the angle is beyond threshold. 
 
 In this example the control points for the spline smoothing are around the corner - which creates a nasty bulge. With the min angle one can force the alghorithm to find a better solution.
-![MIn_Angle_Demo](https://github.com/BenjaminSauder/EdgeFlow/blob/master/docs/Min_Angle_Demo.jpg)
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/a291b7ee-724a-4117-a62b-8c082e5896aa)
+
+#### Blend Mode:
+Absolute: Number of vertices along the edgeloop are used to control the blend
+Factor: Blend length defined by a factor of the edgeloop length 
+#### Blend Start:
+Number of vertices along the start of the edgeloop | The partial length of it
+#### Blend End:
+Number of vertices along the start of the edgeloop | The partial length of it
+#### Blend Curve:
+Linear or Smoothstep blend
+
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/124271b7-c0cf-4772-9b05-f980cd380b45)
+
 
 
 #### How Set Flow works
 
 Back when I first got to see this in action I did quite not understand how it all worked - so I thought i might be well worth adding a quick description to better understand how the underlaying mechanics work.
-(![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/c7875b5a-1f8f-407a-a05f-2f0705ac4cf3))
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/c7875b5a-1f8f-407a-a05f-2f0705ac4cf3)
 
 
 The tool goes over each edge from an edgeloop, and then goes over each vert for this edge. For every vert it searches the points C1-C4 which are used as 'control points' for the spline interpolation - quite similar to how every vector drawing programm works.
