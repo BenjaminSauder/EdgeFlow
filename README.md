@@ -19,6 +19,8 @@ Master is for blender 4.0 - adventures are in the Dev branch.
 The operators can be accessed via the 3D View in the Mesh>Edge and Mesh>Vertex menu, the corresponding   
 rightclick viewport context menus or the default shortcut Ctrl-E / Ctrl-V. 
 
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/f996cf5a-1315-419e-93d3-b5a8810e6d67)
+
 ## Tools
 
 ### Set Flow:
