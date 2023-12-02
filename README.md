@@ -28,9 +28,9 @@ rightclick viewport context menus or the default shortcut Ctrl-E / Ctrl-V.
 My stab at implementing a set flow operator for blender, which is a popular tool in 3ds max and maya. This adjusts the edgeloop via a spline interpolation such that it respects the flow of the surrounding geometry.
 The tool operates orthogonal to the direction of the flow of the edgeloop, indicated by the orange in the image.
 
-**Mix:** Blend between intial vertex positions and the interpolated result  
-**Tension:** Controls the strengh of offset  
-**Iterations:** How often the operation will be repeated  
+**Mix:** Blend between intial vertex positions and the interpolated result.  
+**Tension:** Controls the strengh of offset.  
+**Iterations:** How often the operation will be repeated.  
 **Min Angle:** Cut off angle of the smoothing. Falls back to a linearely extrapolated position if the angle is beyond threshold.  
 
 In this example the control points for the spline smoothing are around the corner - which creates a nasty bulge. With the min angle one can force the alghorithm to find a better solution.
@@ -39,12 +39,12 @@ In this example the control points for the spline smoothing are around the corne
 
 
 **Blend Mode:**   
-- Absolute: Use a number of vertices along the edgeloop to control the blend length  
-- Factor: Blend length defined by a factor of the length from the edgeloop 
+- Absolute: Use a number of vertices along the edgeloop to control the blend length.  
+- Factor: Blend length defined by a factor of the length from the edgeloop. 
      
-**Blend Start:** Number of vertices from the start of the edgeloop | The partial length from the start of the edgeloop  
-**Blend End:** Number of vertices from the end of the edgeloop | The partial length from the end of the edgeloop  
-**Blend Curve:** Linear or Smoothstep blend of the values along the edgeloop
+**Blend Start:** Number of vertices from the start of the edgeloop | The partial length from the start of the edgeloop.  
+**Blend End:** Number of vertices from the end of the edgeloop | The partial length from the end of the edgeloop.  
+**Blend Curve:** Linear or Smoothstep blend of the values along the edgeloop.
 
 Notice how the shape changes from straight to curved at the right image. This obviously only works for edgeloops which are not cyclic.
 
@@ -86,7 +86,9 @@ So it's very important to select in the correct order.
 
 
 **Tension:** Controls the strengh of offset   
-**Topology Distance:** Force the path search to ignore actual edge lenghts, so only topological distance is used 
+**Use Topology Distance:** Force the path search to ignore edge lenghts, so only topological distance is used to find the inbetween vertices. 
+**Flip Half Circle:** (only for 2 vertices) Flip the direction of the half circle.
+**Space evenly:** (only for 3 or more vertices) Place the vertices in even distances.
 
 ## How Set Flow works
 

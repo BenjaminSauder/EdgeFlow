@@ -8,7 +8,7 @@ from . import op_set_edge_flow
 class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
     bl_idname = "mesh.set_edge_curve"
-    bl_label = "Set edge curve"
+    bl_label = "Set Edge Curve"
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Adjust edge loops to loop curvature\nALT: reuse last settings"
 

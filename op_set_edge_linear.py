@@ -8,7 +8,7 @@ from . import op_set_edge_flow
 
 class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
     bl_idname = "mesh.set_edge_linear"
-    bl_label = "Set edge linear"
+    bl_label = "Set Edge Linear"
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Makes edge loops linear between start and end vertices"
 

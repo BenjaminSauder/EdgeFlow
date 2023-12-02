@@ -61,7 +61,7 @@ class SetEdgeLoopBase():
 class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
 
     bl_idname = "mesh.set_edge_flow"
-    bl_label = "Set edge flow"
+    bl_label = "Set Edge Flow"
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = "Adjust edge loops to match surface curvature\nALT: reuse last settings"
 
