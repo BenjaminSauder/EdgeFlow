@@ -78,7 +78,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Interpolate between inital position and the calculated end position")
     
     tension: IntProperty(name="Tension", default=180, min=-500, max=500, description="Tension can be used to tighten up the curvature")    
-    iterations: IntProperty(name="Iterations", default=1, min=1, soft_max=32, description="How often the curveature operation is repeated")
+    iterations: IntProperty(name="Iterations", default=8, min=1, soft_max=32, description="How often the curveature operation is repeated")
     
     blend_mode: bpy.props.EnumProperty(name="Blend Mode", items=blend_mode, description="Switch blend mode between absolute vertex counts and a factor of the whole edgeloop")
     blend_start_int: bpy.props.IntProperty(name="Blend Start", default=0, min=0, description="The number of vertices from the start of the loop used to blend to the adjusted loop position")
@@ -163,7 +163,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
           
         if event and not event.alt:            
             self.tension = 180
-            self.iterations = 1           
+            self.iterations = 8           
             self.mix = 1.0
             self.min_angle = 0
             self.blend_start_int = 0
