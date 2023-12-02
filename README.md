@@ -35,17 +35,20 @@ The tool operates orthogonal to the direction of the flow of the edgeloop, indic
 
 In this example the control points for the spline smoothing are around the corner - which creates a nasty bulge. With the min angle one can force the alghorithm to find a better solution.
 
-![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/a291b7ee-724a-4117-a62b-8c082e5896aa)
+****![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/778a2e59-435d-4338-b2ff-40fc2c444d82)
+
 
 **Blend Mode:**   
-- Absolute: Use a number of vertices along the edgeloop control the blend  
-- Factor: Blend length defined by a factor of the edgeloop length
+- Absolute: Use a number of vertices along the edgeloop to control the blend length  
+- Factor: Blend length defined by a factor of the length from the edgeloop 
      
 **Blend Start:** Number of vertices from the start of the edgeloop | The partial length from the start of the edgeloop  
 **Blend End:** Number of vertices from the end of the edgeloop | The partial length from the end of the edgeloop  
 **Blend Curve:** Linear or Smoothstep blend of the values along the edgeloop
 
-![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/124271b7-c0cf-4772-9b05-f980cd380b45)
+Notice how the shape changes from straight to curved at the right image. This obviously only works for edgeloops which are not cyclic.
+
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/fd584d3f-f232-4351-a251-1863c0d5a4e3)
 
 
 ### Set Linear:
@@ -60,10 +63,11 @@ The tool operates in the direction of the flow of the edgeloop, indicated by the
 
 ### Set Curve:
 
-![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/f7e1690d-e852-4dec-bd40-956b470f94bf)
-
 This tool curves each selected edge loop onto a spline which is controled by the first and the last edge of the edgeloop.
 The tool operates in the direction of the flow of the edgeloop, indicated by the green in the image.
+
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/f7e1690d-e852-4dec-bd40-956b470f94bf)
+
 
 **Mix:** Blend between intial vertex positions and the interpolated result  
 **Tension:** Controls the strengh of offset   
