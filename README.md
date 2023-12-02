@@ -82,7 +82,7 @@ So it's very important to select in the correct order.
 - **3 vertices are selected:** all inbetween points are placed onto a circle which goes through the selected points. You can think of it as start - middle - end points in the selection.
 - **4 or more vertices are selected:** the tool constructs a spline and projects all points onto it.
 
-![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/826b500b-884e-4abe-ad8f-abbb8faa5f19)
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/26a48c27-a5da-4a8a-b42f-55e700d03b1a)
 
 
 **Tension:** Controls the strengh of offset   
