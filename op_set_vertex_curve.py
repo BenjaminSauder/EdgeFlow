@@ -77,21 +77,15 @@ def map_segment_onto_spline(segment, positions):
     '''
 
     total_lenght = 0
-    for index in range(len(positions)):
-        if index == 0:
-            continue
+    for index in range(1, len(positions)):
         total_lenght += (positions[index] - positions[index-1]).magnitude
 
     segment_part_length = total_lenght / float(len(segment)-1)
 
     current_segment_index = 1
     current_length = 0
-    for index in range(len(positions)):
-        if index == 0:
-            continue
-
+    for index in range(1, len(positions)):        
         current_length += (positions[index] - positions[index-1]).magnitude
-
         if current_length >= segment_part_length:
 
             remainder = current_length - segment_part_length
@@ -108,12 +102,13 @@ def map_segment_onto_spline(segment, positions):
                 current_segment_index += 1
 
 
-def curve_hermite(bm, selected, vert_path, tension):
+def curve_hermite(bm, selected, vert_path, tension, space_evenly):
     knots, segments = split_vert_path_into_segments(bm, selected, vert_path)
     
     if len(knots) == 1:                
         return 1, 'Path found is too short - try toggling "Edge Distance"'
   
+    total_spline = []
     for index, segment in enumerate(segments):
         is_start = index == 0
         is_end = index == len(segments)-1
@@ -169,9 +164,16 @@ def curve_hermite(bm, selected, vert_path, tension):
         for i in range(precision):
             mu = i / float(precision)
             spline_pos = interpolate.hermite_3d(p0, p1, p2, p3, mu, -tension, bias)
-            spline_points.append(mathutils.Vector(spline_pos))
+            v = mathutils.Vector(spline_pos)
+            spline_points.append(v)
+                  
+        if not space_evenly:
+            map_segment_onto_spline(segment, spline_points)
+        else:
+            total_spline.extend(spline_points)
 
-        map_segment_onto_spline(segment, spline_points)
+    if space_evenly:     
+        map_segment_onto_spline(vert_path, total_spline)
 
     return 0, ""
 
@@ -291,7 +293,7 @@ def curve_bezier(bm, selected, vert_path):
 
 
 
-def circle_3_points(bm, selected, vert_path, tension):
+def circle_3_points(bm, selected, vert_path, tension, space_evenly):
     knots, segments = split_vert_path_into_segments(bm, selected, vert_path)
 
     vert_a = knots[0]
@@ -328,23 +330,39 @@ def circle_3_points(bm, selected, vert_path, tension):
 
     radius = (a - center).magnitude
 
-    for index, vert in enumerate(segments[0]):
-        mu = index / (len(segments[0])-1)
-        interpolated = start.slerp(middle, mu)
-        interpolated = interpolated.normalized() * radius
-        vert.co = interpolated + center
+    if space_evenly:
+        positions = []
+        samples = len(vert_path)*100
+        for sample in range(samples):
+            mu = sample / samples
+            if mu <= 0.5:
+                interpolated = start.slerp(middle, mu * 2.0)
+                interpolated = interpolated.normalized() * radius
+            else:
+                interpolated = middle.slerp(end, (mu-0.5) * 2.0)
+                interpolated = interpolated.normalized() * radius
 
-    for index, vert in enumerate(segments[1]):
-        mu = index / (len(segments[1])-1)
-        interpolated = middle.slerp(end, mu)
-        interpolated = interpolated.normalized() * radius
+            positions.append(interpolated + center)
+            
+        map_segment_onto_spline(vert_path, positions)
+    else:
+        for index, vert in enumerate(segments[0]):
+            mu = index / (len(segments[0])-1)
+            interpolated = start.slerp(middle, mu)
+            interpolated = interpolated.normalized() * radius
+            vert.co = interpolated + center
 
-        vert.co = interpolated + center
-    
+        for index, vert in enumerate(segments[1]):
+            mu = index / (len(segments[1])-1)
+            interpolated = middle.slerp(end, mu)
+            interpolated = interpolated.normalized() * radius
+
+            vert.co = interpolated + center
+
     return 0, ""
 
 
-def circle_2_points(bm, selected, vert_path, tension):
+def circle_2_points(bm, selected, vert_path, tension, flip):
     '''
     Spaces the vertices into a half circle between two points, orientation is based on the topology of the first vert
     '''
@@ -358,18 +376,23 @@ def circle_2_points(bm, selected, vert_path, tension):
     center = (a + c) * 0.5
     radius = (a - c).magnitude * 0.5
 
-    n = None
-    for corner in vert_a.link_loops:        
-        if corner.link_loop_next.vert == vert_path[1]:           
-            n = (vert_a.co - corner.link_loop_prev.vert.co).normalized()
-            break
-        elif corner.link_loop_prev.vert == vert_path[1]:
-            n = (corner.link_loop_next.vert.co - vert_a.co).normalized()
-            break 
+    # n = None
+    # for corner in vert_a.link_loops:        
+    #     if corner.link_loop_next.vert == vert_path[1]:           
+    #         n = (vert_a.co - corner.link_loop_prev.vert.co).normalized()
+    #         break
+    #     elif corner.link_loop_prev.vert == vert_path[1]:
+    #         n = (corner.link_loop_next.vert.co - vert_a.co).normalized()
+    #         break 
 
-    #n = n.cross(c-a).normalized()
-    n = -n
+    n = vert_a.normal.cross(c-a).normalized()
+        
     # n = (vert_a.normal + vert_b.normal).normalized()
+    # n = vert_a.normal.cross(a-c).normalized()
+    
+    if flip:
+        n = -n
+
     b = center + n * radius
 
     u = c - center
@@ -398,7 +421,7 @@ OPERATOR
 
 class SetVertexCurveOp(bpy.types.Operator):
     bl_idname = "mesh.align_vertex_curve"
-    bl_label = "Align vertices to curve defined by selected vertices."
+    bl_label = "Set Vertex Curve"
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = '''Curves vertices between the selected vertices in picking order of the selected vertices.
     2 vertices selected: placed on a half circle between endpoints.
@@ -408,8 +431,25 @@ class SetVertexCurveOp(bpy.types.Operator):
     ALT: reuse last settings
     '''
 
+
     tension : IntProperty(name="Tension", default=0, min=-500, max=500, description="Tension can be used to tighten up the curvature")
-    use_topology_distance : BoolProperty(name="Topology Distance", default=False , description="Use the edge count instead of edge lengths for distance measure") 
+    use_topology_distance : BoolProperty(name="Use Topology Distance", default=False , description="Use the edge count instead of edge lengths for distance measure") 
+    flip : BoolProperty(name="Flip Half Circle", default=False , description="Flip the half circle into other direction") 
+    space_evenly : BoolProperty(name="Space evenly", default=False, description="Spread the vertices in even distances")
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True 
+        column = layout.column(align=True)
+
+        column.prop(self, "tension")
+        column.prop(self, "use_topology_distance")
+
+        if self.vert_count == 2:
+            column.prop(self, "flip")
+        if self.vert_count >= 3:
+            column.prop(self, "space_evenly")
+
 
     @classmethod
     def poll(cls, context):
@@ -422,6 +462,7 @@ class SetVertexCurveOp(bpy.types.Operator):
             return mesh_select_mode == (True, False, False)
         else:
             return False
+        
 
     def get_bm(self, me):
         bm = bmesh.from_edit_mesh(me)
@@ -445,20 +486,23 @@ class SetVertexCurveOp(bpy.types.Operator):
             self.original_positions.append(position)
 
     def update_mesh(self, bm, vert_path):
-        need_normal_update = set()
-        for vert in vert_path:
-            for face in vert.link_faces:
-                need_normal_update.add(face)
+        # need_normal_update = set()
+        # for vert in vert_path:
+        #     for face in vert.link_faces:
+        #         need_normal_update.add(face)
                 
-        bmesh.ops.recalc_face_normals(bm, faces=list(need_normal_update))
+        # bmesh.ops.recalc_face_normals(bm, faces=list(need_normal_update))
         bmesh.update_edit_mesh(self.obj.data, loop_triangles=True)
 
     def invoke(self, context, event):
         # print ("-" * 66)
        
+        self.vert_count = 0
+
         if event and not event.alt:       
             self.tension = 0
             self.use_topology_distance = False
+            self.space_evenly = False 
                     
         self.obj = context.object               
         return self.execute(context)
@@ -466,6 +510,8 @@ class SetVertexCurveOp(bpy.types.Operator):
     def execute(self, context):       
         bm = self.get_bm(self.obj.data)
         selected = self.get_selected(bm)      
+
+        self.vert_count = len(selected)
 
         if len(selected) < 2:
             self.report({'WARNING'}, f"Align vertex curve: Please select 2, 3 or more vertices")
@@ -477,11 +523,11 @@ class SetVertexCurveOp(bpy.types.Operator):
         tension = self.tension / 100.0
         
         if len(selected) == 2:            
-            result, msg = circle_2_points(bm, selected, vert_path, tension)
+            result, msg = circle_2_points(bm, selected, vert_path, tension, self.flip)
         elif len(selected) == 3:
-            result, msg = circle_3_points(bm, selected, vert_path, tension)
+            result, msg = circle_3_points(bm, selected, vert_path, tension, self.space_evenly)
         else:           
-            result, msg = curve_hermite(bm, selected, vert_path, tension)
+            result, msg = curve_hermite(bm, selected, vert_path, tension, self.space_evenly)
 
         if result > 0:
             self.report({'INFO'}, msg)
