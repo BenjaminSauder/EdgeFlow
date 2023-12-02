@@ -9,15 +9,17 @@ Master is for blender 4.0 - adventures are in the Dev branch.
 
 * Get the latest EdgeFlow.zip release in: https://github.com/BenjaminSauder/EdgeFlow/releases
 * start Blender and open the user preferences
-* switch to the Add-ons tab and click the Install Add-on from file... button at the bottom
-* locate the downloaded EdgeFlow.zip file and double-click it
+* switch to the Add-ons tab and click the 'Install...' button
+* locate the downloaded EdgeFlow.zip file and double-click it to install
 * search for the addon "EdgeFlow"
 * activate the addon by ticking the checkbox (hit the Save User Settings button at the bottom if your blender is setup that way)
 
-### Where are these located in blender?
+#### Where are these located in blender?
 
 The operators can be accessed via the 3D View in the Mesh>Edge and Mesh>Vertex menu, the corresponding   
 rightclick viewport context menus or the default shortcut Ctrl-E / Ctrl-V. 
+
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/e29dcb97-e9fa-47b2-a789-3a800a33b35a)
 
 ## Tools
 
