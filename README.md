@@ -35,7 +35,7 @@ The tool operates orthogonal to the direction of the flow of the edgeloop, indic
 
 In this example the control points for the spline smoothing are around the corner - which creates a nasty bulge. With the min angle one can force the alghorithm to find a better solution.
 
-****![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/778a2e59-435d-4338-b2ff-40fc2c444d82)
+![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/778a2e59-435d-4338-b2ff-40fc2c444d82)
 
 
 **Blend Mode:**   
@@ -78,13 +78,15 @@ The tool operates in the direction of the flow of the edgeloop, indicated by the
 This tool works creates a curve based on vertex selections. The picking order of the selected vertices defines the outcome of the tool. 
 So it's very important to select in the correct order.
 
-- 2 vertices are selected, a half circle is constructed between the points.  
-- 3 vertices are selected, all inbetween points are placed onto a circle which goes through the selected points. You can think of it as start - middle - end points in the selection.
-- 4 or more vertices are selected, the tool constructs a spline and projects all points onto it.
+- **2 vertices are selected:** a half circle is constructed between the points.  
+- **3 vertices are selected:** all inbetween points are placed onto a circle which goes through the selected points. You can think of it as start - middle - end points in the selection.
+- **4 or more vertices are selected:** the tool constructs a spline and projects all points onto it.
 
 ![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/826b500b-884e-4abe-ad8f-abbb8faa5f19)
 
 
+**Tension:** Controls the strengh of offset   
+**Edge Distance:** Force the path search between the selected points to ignore actual edge lenghts, so only topological distance is used 
 
 ## How Set Flow works
 
