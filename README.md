@@ -14,7 +14,7 @@ Master is for blender 4.0 - adventures are in the Dev branch.
 * search for the addon "EdgeFlow"
 * activate the addon by ticking the checkbox (hit the Save User Settings button at the bottom if your blender is setup that way)
 
-### Where are these located in blender?
+#### Where are these located in blender?
 
 The operators can be accessed via the 3D View in the Mesh>Edge and Mesh>Vertex menu, the corresponding   
 rightclick viewport context menus or the default shortcut Ctrl-E / Ctrl-V. 
