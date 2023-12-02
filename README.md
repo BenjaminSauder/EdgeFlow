@@ -88,9 +88,9 @@ So it's very important to select in the correct order.
 
 
 **Tension:** Controls the strengh of offset   
-**Use Topology Distance:** Force the path search to ignore edge lenghts, so only topological distance is used to find the inbetween vertices. 
-**Flip Half Circle:** (only for 2 vertices) Flip the direction of the half circle.
-**Space evenly:** (only for 3 or more vertices) Place the vertices in even distances.
+**Use Topology Distance:** Force the path search to ignore edge lenghts, so only topological distance is used to find the inbetween vertices.   
+**Flip Half Circle:** (only for 2 vertices) Flip the direction of the half circle.  
+**Space evenly:** (only for 3 or more vertices) Place the vertices in even distances.  
 
 ## How Set Flow works
 
