@@ -37,6 +37,8 @@ class Loop():
         for i, v in enumerate(self.verts):
             self.initial_vert_positions.append(v.co.copy())
 
+        self.is_cyclic = self.verts[0] == self.verts[-1]
+        
         # print("edgeloop length: %s" % len(self.edges))
         self.valences = []
 
@@ -95,7 +97,7 @@ class Loop():
 
     def set_curve_flow(self, tension, mix):
         count = len(self.edges)
-        if count < 2:
+        if count < 2 or self.is_cyclic:
             return
 
         self.bm.verts.ensure_lookup_table()
@@ -153,10 +155,10 @@ class Loop():
                 return -d.normalized()
                
             elif len(point.link_edges) == 3:  
-                original_corner = point.link_loops[0]
-                for corner in point.link_loops:              
-                    if corner.vert == point and corner.edge == edge:
-                        original_corner = corner
+                # original_corner = point.link_loops[0]
+                # for corner in point.link_loops:              
+                #     if corner.vert == point and corner.edge == edge:
+                #         original_corner = corner
                 
                 # edge is at an 'end'
                 # _|_
@@ -273,13 +275,7 @@ class Loop():
 
                 if current_edge_index == len(self.edges)-1:
                     break
-                
 
-    def get_average_distance(self):
-        dist = 0
-        for e in self.edges:
-            dist += (e.verts[0].co - e.verts[1].co).length
-        return dist / float(len(self.edges))
 
     def straighten(self, distance):
         '''
@@ -351,13 +347,10 @@ class Loop():
         a2.co = b2 - distance * direction
 
 
-    def set_linear(self, even_spacing):
-
+    def set_linear(self, even_spacing):        
         count = len(self.edges)
-        if count < 2:
+        if count < 2 or self.is_cyclic:
             return
-
-        #print("even_spacing:", even_spacing)
 
         for p in self.edges[0].verts:
             if p not in self.edges[1].verts:
@@ -373,8 +366,7 @@ class Loop():
 
         last_vert = p1
         for i in range(count - 1):
-            vert = self.edges[i].other_vert(last_vert)
-            # print(vert.index, "--", vert.co)
+            vert = self.edges[i].other_vert(last_vert)           
 
             if even_spacing:
                 vert.co = p1.co + direction * (i + 1)
@@ -387,6 +379,9 @@ class Loop():
 
 
     def blend_start_end(self, blend_start, blend_end, blend_type):
+        
+        if self.is_cyclic:
+            return
 
         count = len(self.verts)
         start_count = blend_start
