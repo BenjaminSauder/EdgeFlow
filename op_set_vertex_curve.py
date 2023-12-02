@@ -409,7 +409,7 @@ class SetVertexCurveOp(bpy.types.Operator):
     '''
 
     tension : IntProperty(name="Tension", default=0, min=-500, max=500, description="Tension can be used to tighten up the curvature")
-    use_topology_distance : BoolProperty(name="Edge Distance", default=False , description="Use the edge count instead of edge lengths for distance measure") 
+    use_topology_distance : BoolProperty(name="Topology Distance", default=False , description="Use the edge count instead of edge lengths for distance measure") 
 
     @classmethod
     def poll(cls, context):

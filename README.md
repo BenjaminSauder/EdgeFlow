@@ -86,7 +86,7 @@ So it's very important to select in the correct order.
 
 
 **Tension:** Controls the strengh of offset   
-**Edge Distance:** Force the path search between the selected points to ignore actual edge lenghts, so only topological distance is used 
+**Topology Distance:** Force the path search to ignore actual edge lenghts, so only topological distance is used 
 
 ## How Set Flow works
 
