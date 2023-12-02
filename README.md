@@ -9,8 +9,8 @@ Master is for blender 4.0 - adventures are in the Dev branch.
 
 * Get the latest EdgeFlow.zip release in: https://github.com/BenjaminSauder/EdgeFlow/releases
 * start Blender and open the user preferences
-* switch to the Add-ons tab and click the Install Add-on from file... button at the bottom
-* locate the downloaded EdgeFlow.zip file and double-click it
+* switch to the Add-ons tab and click the 'Install...' button
+* locate the downloaded EdgeFlow.zip file and double-click it to install
 * search for the addon "EdgeFlow"
 * activate the addon by ticking the checkbox (hit the Save User Settings button at the bottom if your blender is setup that way)
 
