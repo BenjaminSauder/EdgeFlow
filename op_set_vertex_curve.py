@@ -76,6 +76,9 @@ def map_segment_onto_spline(segment, positions):
     Calculates the total arc length, and evenly distributes the points based on this.
     '''
 
+    if len(segment) == 1:
+        return
+
     total_lenght = 0
     for index in range(1, len(positions)):
         total_lenght += (positions[index] - positions[index-1]).magnitude
