@@ -5,7 +5,9 @@ This addon adds operators to blender which help when dealing with curved shaped 
 Feel free to create issues, file requests etc. but be aware of that I might not find time to work on this as much as I'd probably need to. 
 
 ## Installation
-Master is for blender 4.0 - adventures are in the Dev branch.
+Master is stable - adventures are in the Dev branch.
+
+The addon should work from blender 3.5+ and also work in the current blender release.
 
 * Get the latest EdgeFlow.zip release in: https://github.com/BenjaminSauder/EdgeFlow/releases
 * start Blender and open the user preferences
