@@ -1,7 +1,7 @@
 import math
 import time
 import bpy
-from bpy.props import IntProperty, FloatProperty, EnumProperty
+from bpy.props import BoolProperty, IntProperty, FloatProperty, EnumProperty
 
 from . import op_set_edge_flow
 
@@ -14,7 +14,8 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
     mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Interpolate between inital position and the calculated end position")
     tension : IntProperty(name="Tension", default=100, soft_min=-500, soft_max=500, description="Tension can be used to tighten up the curvature")
-
+    use_rail : BoolProperty(name="Use Rail", default=False, description="The first and last edge of the edgeloop control the curvature")
+   
     def execute(self, context):
         # print ("execute")
 
@@ -27,7 +28,7 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
         for obj in self.objects:            
             for edgeloop in self.edgeloops[obj]:
-                edgeloop.set_curve_flow(self.tension / 100.0, self.mix)
+                edgeloop.set_curve_flow(self.tension / 100.0, self.mix, self.use_rail)
 
             self.bm[obj].to_mesh(obj.data)
 

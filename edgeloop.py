@@ -5,6 +5,7 @@ import mathutils
 
 from . import interpolate
 
+from .op_set_vertex_curve  import map_segment_onto_spline 
 
 class Loop():
     def __init__(self, bm, edges):
@@ -95,7 +96,7 @@ class Loop():
         ring = self.edge_rings[edge]
         return (ring[0], ring[len(ring) - 1])
 
-    def set_curve_flow(self, tension, mix):
+    def set_curve_flow(self, tension, mix, use_rail):
         count = len(self.edges)
         if count < 2 or self.is_cyclic:
             return
@@ -103,18 +104,15 @@ class Loop():
         self.bm.verts.ensure_lookup_table()
         self.bm.edges.ensure_lookup_table()
 
-        p1, p4 = None, None
-
+        start_vert, end_vert = None, None
         #get starting points
         for p in self.edges[0].verts:
             if p not in self.edges[1].verts:
-                p1 = p
+                start_vert = p
 
         for p in self.edges[-1].verts:
             if p not in self.edges[-2].verts:
-                p4 = p
-
-        #print(f"endpoints: {p1}, {p4}")
+                end_vert = p
 
         def print_bm_loop(corner):
             '''
@@ -207,74 +205,50 @@ class Loop():
                 c = c.cross(n)
                 return -c.normalized()         
         
-        dir1 = find_direction(p1, self.edges[0])
-        dir2 = find_direction(p4, self.edges[-1])
-        # return
+        # if use_rail:
+        #     dir1 = self.edges[0].other_vert(start_vert).co - start_vert.co
+        #     dir1 = dir1.normalized()
+        #     dir2 = self.edges[-1].other_vert(end_vert).co - end_vert.co
+        #     dir2 = dir2.normalized()
+        # else:
+        #     dir1 = find_direction(start_vert, self.edges[0])
+        #     dir2 = find_direction(end_vert, self.edges[-1])
+        
+        dir1 = self.edges[0].other_vert(start_vert).co - start_vert.co
+        dir1 = dir1.normalized()
+        dir2 = self.edges[-1].other_vert(end_vert).co - end_vert.co
+        dir2 = dir2.normalized()
 
-        start_vert = p1
-
-        p1 = p1.co
-        p4 = p4.co
+        if use_rail:
+            p1 = self.edges[0].other_vert(start_vert).co
+            p4 = self.edges[-1].other_vert(end_vert).co
+        else:
+            p1 = start_vert.co
+            p4 = end_vert.co
 
         scale = (p1 - p4).length * 0.5
         scale *= tension
 
-        # p2 = p1 - (dir1 * scale)
-        # p3 = p4 - (dir2 * scale)
-
         p2 = p1 + (dir1 * scale)
         p3 = p4 + (dir2 * scale)
-
-        add_debug_verts = False
-        if add_debug_verts:
-            # bmesh.ops.create_vert(self.bm, co=p1)
-            # bmesh.ops.create_vert(self.bm, co=p4)
-            bmesh.ops.create_vert(self.bm, co=p2)
-            bmesh.ops.create_vert(self.bm, co=p3)
+         
+        #add_debug_verts = False
+        #if add_debug_verts:
+        #    # bmesh.ops.create_vert(self.bm, co=p1)
+        #    # bmesh.ops.create_vert(self.bm, co=p4)
+        #    bmesh.ops.create_vert(self.bm, co=p2)
+        #    bmesh.ops.create_vert(self.bm, co=p3)
        
-      
         spline_points = []
-        precision = 1000
-
-        # knot1, handle1, handle2, knot2, resolution)
-      
+        precision = 1000      
         spline_points = mathutils.geometry.interpolate_bezier(p1, p2, p3, p4, precision)
 
-        # bias = 0
-        # for i in range(precision):
-        #     mu = i / float(precision)
-
-        #     spline_pos = interpolate.hermite_3d(p2, p1, p4, p3, mu, -tension, bias)
-        #     # if add_debug_verts:
-        #     #     bmesh.ops.create_vert(self.bm, co=spline_pos)
-        #     spline_points.append(mathutils.Vector(spline_pos))
-
-        total_lenght = 0
-        for index in range(1, len(spline_points)):
-            total_lenght += (spline_points[index] - spline_points[index-1]).magnitude
+        if use_rail:
+            map_segment_onto_spline(self.verts[1:-1], spline_points)
+        else:
+            map_segment_onto_spline(self.verts, spline_points)
 
 
-        segment_length = total_lenght /  float(len(self.edges))
-        # print(total_lenght, segment_length)
-        current_point = start_vert
-        current_edge_index = 0
-        current_length = 0
-
-        for index in range(1, len(spline_points)):
-            current_length += (spline_points[index] - spline_points[index-1]).magnitude
-            
-            if current_length > segment_length:                
-                current_length = 0
-                position = spline_points[index]
-
-                e = self.edges[current_edge_index]
-                current_point = e.other_vert(current_point)  
-                current_point.co = current_point.co.lerp(position, mix)      
-
-                current_edge_index += 1
-
-                if current_edge_index == len(self.edges)-1:
-                    break
 
 
     def straighten(self, distance):

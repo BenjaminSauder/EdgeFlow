@@ -77,7 +77,7 @@ The tool operates in the direction of the flow of the edgeloop, indicated by the
 
 ### Set Vertex Curve:
 
-This tool works creates a curve based on vertex selections. The picking order of the selected vertices defines the outcome of the tool. 
+This tool moves vertices to a curve based on vertex selections. The picking order of the selected vertices defines the outcome of the tool. 
 So it's very important to select in the correct order.
 
 - **2 vertices are selected:** a half circle is constructed between the points.  
