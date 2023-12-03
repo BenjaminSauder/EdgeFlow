@@ -96,7 +96,7 @@ class Loop():
         ring = self.edge_rings[edge]
         return (ring[0], ring[len(ring) - 1])
 
-    def set_curve_flow(self, tension, mix, use_rail):
+    def set_curve_flow(self, tension, use_rail):
         count = len(self.edges)
         if count < 2 or self.is_cyclic:
             return

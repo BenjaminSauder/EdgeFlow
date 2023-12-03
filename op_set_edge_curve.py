@@ -28,7 +28,11 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
         for obj in self.objects:            
             for edgeloop in self.edgeloops[obj]:
-                edgeloop.set_curve_flow(self.tension / 100.0, self.mix, self.use_rail)
+                edgeloop.set_curve_flow(self.tension / 100.0, self.use_rail)
+            
+            if self.mix < 1.0:
+                for i, vert in enumerate(edgeloop.verts):
+                    vert.co = edgeloop.initial_vert_positions[i].lerp(vert.co, self.mix)
 
             self.bm[obj].to_mesh(obj.data)
 
