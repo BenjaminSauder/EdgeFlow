@@ -72,8 +72,8 @@ The tool operates in the direction of the flow of the edgeloop, indicated by the
 
 
 **Mix:** Blend between intial vertex positions and the interpolated result  
-**Tension:** Controls the strengh of offset   
-
+**Tension:** Controls the strengh of offset  
+**Use Rail:** The first and last edge of the edgeloop stay in place
 
 ### Set Vertex Curve:
 
