@@ -10,15 +10,12 @@ class SetEdgeLoopBase():
     def __init__(self):
         self.is_invoked = False
         
-    def get_bm(self, obj):
-        bm = bmesh.new()
-        bm.from_mesh(obj.data)
-        bm.normal_update()
+    def get_bm(self, obj):        
+        bm = bmesh.from_edit_mesh(obj.data)
         bm.verts.ensure_lookup_table()
         return bm
 
-    def revert(self):
-        # print("reverting vertex positions")
+    def revert(self):        
         for obj in self.objects:
             for edgeloop in self.edgeloops[obj]:
                 for i, vert in enumerate(edgeloop.verts):
@@ -41,11 +38,12 @@ class SetEdgeLoopBase():
         self.edgeloops = {}
         self.vert_positions = {}
 
-        bpy.ops.object.mode_set(mode='OBJECT')
-
         ignore = set()
-
         for obj in self.objects:
+            if obj.mode != 'EDIT':
+                ignore.add(obj)
+                continue
+
             self.bm[obj] = self.get_bm(obj)
 
             edges = [e for e in self.bm[obj].edges if e.select]
@@ -120,10 +118,8 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
      
         if not self.is_invoked:        
             return self.invoke(context, None)
-
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.revert()
+        else:
+            self.revert()
 
         for obj in self.objects:
             for i in range(self.iterations):
@@ -147,12 +143,10 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
                     for i, vert in enumerate(edgeloop.verts):
                         vert.co = edgeloop.initial_vert_positions[i].lerp(vert.co, self.mix)
 
-            self.bm[obj].to_mesh(obj.data)
-
-        bpy.ops.object.mode_set(mode='EDIT')
+            self.bm[obj].normal_update()
+            bmesh.update_edit_mesh(obj.data)
 
         self.is_invoked = False
-
         return {'FINISHED'}
 
 

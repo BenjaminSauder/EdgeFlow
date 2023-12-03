@@ -32,17 +32,15 @@ class SetEdgeLinearOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
       
         if not self.is_invoked:        
             return self.invoke(context, None)
-
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.revert()
+        else:
+            self.revert()
 
         for obj in self.objects:
             for edgeloop in self.edgeloops[obj]:               
                 edgeloop.set_linear(self.space_evenly)
 
-            self.bm[obj].to_mesh(obj.data)
+            self.bm[obj].normal_update()
+            bmesh.update_edit_mesh(obj.data)
 
-        bpy.ops.object.mode_set(mode='EDIT')
         self.is_invoked = False
         return {'FINISHED'}

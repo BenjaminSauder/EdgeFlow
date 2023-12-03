@@ -2,6 +2,7 @@ import math
 import time
 import bpy
 from bpy.props import BoolProperty, IntProperty, FloatProperty, EnumProperty
+import bmesh
 
 from . import op_set_edge_flow
 
@@ -21,10 +22,8 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
         if not self.is_invoked:        
             return self.invoke(context, None)
-
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        self.revert()
+        else:
+            self.revert()
 
         for obj in self.objects:            
             for edgeloop in self.edgeloops[obj]:
@@ -34,9 +33,9 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
                 for i, vert in enumerate(edgeloop.verts):
                     vert.co = edgeloop.initial_vert_positions[i].lerp(vert.co, self.mix)
 
-            self.bm[obj].to_mesh(obj.data)
+            self.bm[obj].normal_update()
+            bmesh.update_edit_mesh(obj.data)
 
-        bpy.ops.object.mode_set(mode='EDIT')
         self.is_invoked = False
         return {'FINISHED'}
 
@@ -47,7 +46,6 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
      
         if event and not event.alt:
             self.tension = 100
-            self.mix = 1.0          
-
+            self.mix = 1.0 
 
         return self.execute(context)
