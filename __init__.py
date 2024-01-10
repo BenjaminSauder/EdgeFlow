@@ -58,7 +58,7 @@ def menu_func_vertices(self, context):
 
 
 class VIEW3D_MT_edit_mesh_set_flow(Menu):
-    bl_label = "Set Flow"
+    bl_label = "Edge Flow"
 
     def draw(self, context):
         layout = self.layout
