@@ -355,6 +355,7 @@ class Loop():
     def blend_start_end(self, blend_start, blend_end, blend_type):
         
         if self.is_cyclic:
+            # print("skip cyclic loop")
             return
 
         count = len(self.verts)
