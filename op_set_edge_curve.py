@@ -18,34 +18,35 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
     use_rail : BoolProperty(name="Use Rail", default=False, description="The first and last edge stay in place")
    
     def execute(self, context):
-        # print ("execute")
-
         if not self.is_invoked:        
             return self.invoke(context, None)
         else:
-            self.revert()
+            self.revert_to_intial_positions()
+
+        refresh_positions = self.mix == self.last_mix
+
+        if refresh_positions:
+            for obj in self.objects:            
+                for edgeloop in self.edgeloops[obj]:
+                    edgeloop.set_curve_flow(self.tension / 100.0, self.use_rail)
+
+            self.store_final_positions()
+
+        self.apply_mix()
 
         for obj in self.objects:            
-            for edgeloop in self.edgeloops[obj]:
-                edgeloop.set_curve_flow(self.tension / 100.0, self.use_rail)
-            
-            if self.mix < 1.0:
-                for i, vert in enumerate(edgeloop.verts):
-                    vert.co = edgeloop.initial_vert_positions[i].lerp(vert.co, self.mix)
-
             self.bm[obj].normal_update()
             bmesh.update_edit_mesh(obj.data)
 
+        self.last_mix = self.mix
         self.is_invoked = False
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        # print("invoke")
-
         super(SetEdgeCurveOP, self).invoke(context)
      
         if event and not event.alt:
-            self.tension = 100
             self.mix = 1.0 
+            self.tension = 100
 
         return self.execute(context)
