@@ -57,8 +57,8 @@ def menu_func_vertices(self, context):
     layout.operator(op_set_vertex_curve.SetVertexCurveOp.bl_idname, text='Set Vertex Curve')
 
 
-class VIEW3D_MT_edit_mesh_set_flow(Menu):
-    bl_label = "Set Flow"
+class VIEW3D_MT_edit_mesh_edge_flow(Menu):
+    bl_label = "Edge Flow"
 
     def draw(self, context):
         layout = self.layout
@@ -75,7 +75,7 @@ def menu_func_context_menu(self, context):
 
     mesh_select_mode = context.scene.tool_settings.mesh_select_mode[:3]    
     if mesh_select_mode == (True, False, False) or mesh_select_mode == (False, True, False):
-        self.layout.menu("VIEW3D_MT_edit_mesh_set_flow")
+        self.layout.menu("VIEW3D_MT_edit_mesh_edge_flow")
         self.layout.separator()
 
 
@@ -85,7 +85,7 @@ classes = [
     op_set_edge_linear.SetEdgeLinearOP,
     op_set_edge_curve.SetEdgeCurveOP,
     op_set_vertex_curve.SetVertexCurveOp,
-    VIEW3D_MT_edit_mesh_set_flow,
+    VIEW3D_MT_edit_mesh_edge_flow,
 ]
 
 def register():
