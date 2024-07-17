@@ -29,7 +29,7 @@ rightclick viewport context menus or the default shortcut Ctrl-E / Ctrl-V.
 
 ![grafik](https://github.com/BenjaminSauder/EdgeFlow/assets/13512160/5397adac-54c4-48c8-9999-e121c85db7d6)
 
-My stab at implementing a set flow operator for blender, which is a popular tool in 3ds max and maya. This adjusts the edgeloop via a spline interpolation such that it respects the flow of the surrounding geometry.
+My stab at implementing a set flow operator for blender, which is a popular tool in many 3d applications. This adjusts the edgeloop via a spline interpolation such that it respects the flow of the surrounding geometry.
 The tool operates orthogonal to the direction of the flow of the edgeloop, indicated by the orange in the image.
 
 **Mix:** Blend between intial vertex positions and the interpolated result.  

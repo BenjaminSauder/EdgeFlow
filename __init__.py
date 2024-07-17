@@ -14,7 +14,6 @@ bl_info = {
 if "bpy" in locals():
     import importlib
 
-    importlib.reload(prefs)
     importlib.reload(util)
     importlib.reload(edgeloop)
     importlib.reload(interpolate)
@@ -24,7 +23,6 @@ if "bpy" in locals():
     importlib.reload(op_set_vertex_curve)
 else:
     from . import (
-        prefs,
         util,
         interpolate,
         edgeloop,
@@ -89,9 +87,6 @@ classes = [
 ]
 
 def register():
-    if prefs.isDebug:
-        print("register")
-
     for c in classes:
         bpy.utils.register_class(c)
 
@@ -101,9 +96,6 @@ def register():
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(menu_func_context_menu)
 
 def unregister():
-    if prefs.isDebug:
-        print("unregister")
-
     for c in classes:
         bpy.utils.unregister_class(c)
 

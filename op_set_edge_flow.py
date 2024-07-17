@@ -102,7 +102,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     bl_idname = "mesh.set_edge_flow"
     bl_label = "Set Edge Flow"
     bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "Adjust edge loops to match surface curvature\nALT: reuse last settings"
+    bl_description = "Adjust curvature to match surface defined by edges crossing the edgeloop\nALT: reuse last settings"
 
     blend_mode = (
         ("ABSOLUTE", "Absolute", "", 1),
