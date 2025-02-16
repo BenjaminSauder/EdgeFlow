@@ -247,9 +247,6 @@ class Loop():
         precision = 1000
         spline_points = mathutils.geometry.interpolate_bezier(p1, p2, p3, p4, precision)
 
-        # if use_rail:
-        #     map_segment_onto_spline(self.verts[1:-1], spline_points)
-        # else:
         map_segment_onto_spline(self.verts, spline_points)
 
 

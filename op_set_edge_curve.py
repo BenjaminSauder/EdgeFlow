@@ -25,35 +25,38 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
     rail_mode: bpy.props.EnumProperty(name="Rail Mode", items=rail_mode, default=2, description="Switch rail mode between using absolute units or a factor of the length of the edge")
     rail_start_width : FloatProperty(name="Rail Start", default=1.0, soft_min=0.0, subtype='DISTANCE', description="Choose how long the rail is at the start")
     rail_end_width : FloatProperty(name="Rail End", default=1.0, soft_min=0.0, subtype='DISTANCE', description="Choose how long the rail is at the end")
-    rail_start_factor : FloatProperty(name="Rail Start", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Choose how long the rail is at the start")
-    rail_end_factor : FloatProperty(name="Rail End", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Choose how long the rail is at the end")
+    rail_start_factor : FloatProperty(name="Rail Start", default=1.0, soft_min=0.0, soft_max=1.5, subtype='FACTOR', description="Choose how long the rail is at the start")
+    rail_end_factor : FloatProperty(name="Rail End", default=1.0, soft_min=0.0, soft_max=1.5, subtype='FACTOR', description="Choose how long the rail is at the end")
    
     def execute(self, context):
-        # print ("execute")
-
         if not self.is_invoked:        
             return self.invoke(context, None)
         else:
-            self.revert()
+            self.revert_to_intial_positions()
+
+        refresh_positions = self.mix == self.last_mix
+
+        if refresh_positions:
+            for obj in self.objects:            
+                for edgeloop in self.edgeloops[obj]:
+                    if self.rail_mode == 'ABSOLUTE':
+                        rail_start = self.rail_start_width    
+                        rail_end = self.rail_end_width
+                    else:
+                        rail_start = self.rail_start_factor
+                        rail_end = self.rail_end_factor
+
+                    edgeloop.set_curve_flow(self.tension / 100.0, self.use_rail, self.rail_mode, rail_start, rail_end)
+                
+                self.store_final_positions()
+
+        self.apply_mix()
 
         for obj in self.objects:            
-            for edgeloop in self.edgeloops[obj]:
-                if self.rail_mode == 'ABSOLUTE':
-                    rail_start = self.rail_start_width    
-                    rail_end = self.rail_end_width
-                else:
-                    rail_start = self.rail_start_factor
-                    rail_end = self.rail_end_factor
-
-                edgeloop.set_curve_flow(self.tension / 100.0, self.use_rail, self.rail_mode, rail_start, rail_end)
-            
-            if self.mix < 1.0:
-                for i, vert in enumerate(edgeloop.verts):
-                    vert.co = edgeloop.initial_vert_positions[i].lerp(vert.co, self.mix)
-
             self.bm[obj].normal_update()
             bmesh.update_edit_mesh(obj.data)
 
+        self.last_mix = self.mix
         self.is_invoked = False
         return {'FINISHED'}
 
@@ -83,8 +86,6 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
         sub_column.enabled = self.use_rail
 
     def invoke(self, context, event):
-        # print("invoke")
-
         super(SetEdgeCurveOP, self).invoke(context)
      
         if event and not event.alt:
