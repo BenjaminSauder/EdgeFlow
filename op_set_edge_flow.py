@@ -8,15 +8,7 @@ from . import util
 class SetEdgeLoopBase():
 
     mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Interpolate between inital position and the calculated end position")
-
-    def __init__(self):
-        self.is_invoked = False
-
-        self.last_mix = self.mix
-        
-        self.intial_vert_positions = {}
-        self.final_vert_positions = {}
-
+    
     def get_bm(self, obj):        
         bm = bmesh.from_edit_mesh(obj.data)
         bm.verts.ensure_lookup_table()
@@ -62,6 +54,12 @@ class SetEdgeLoopBase():
     '''
     def invoke(self, context):
         self.is_invoked = True
+
+        self.last_mix = self.mix
+        
+        self.intial_vert_positions = {}
+        self.final_vert_positions = {}
+
 
         self.objects = set(context.selected_editable_objects) if context.selected_editable_objects else set([context.object])
         self.bm = {}
