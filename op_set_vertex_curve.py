@@ -365,7 +365,7 @@ def circle_3_points(bm, selected, vert_path, tension, space_evenly):
     return 0, ""
 
 
-def circle_2_points(bm, selected, vert_path, tension, flip):
+def circle_2_points(bm, selected, vert_path, tension, flip, rotate):
     '''
     Spaces the vertices into a half circle between two points, orientation is based on the topology of the first vert
     '''
@@ -388,10 +388,13 @@ def circle_2_points(bm, selected, vert_path, tension, flip):
     #         n = (corner.link_loop_next.vert.co - vert_a.co).normalized()
     #         break
 
+    # n = (vert_a.normal + vert_b.normal).normalized()
+        # n = vert_a.normal.cross(a-c).normalized()
+
     n = vert_a.normal.cross(c-a).normalized()
 
-    # n = (vert_a.normal + vert_b.normal).normalized()
-    # n = vert_a.normal.cross(a-c).normalized()
+    if rotate:
+        n = n .cross(a-c).normalized()
 
     if flip:
         n = -n
@@ -443,6 +446,8 @@ class SetVertexCurveOp(bpy.types.Operator):
                                         description="Use the edge count instead of edge lengths for distance measure")
     flip: BoolProperty(name="Flip Half Circle", default=False,
                        description="Flip the half circle into other direction")
+    rotate: BoolProperty(name="Rotate Half Circle", default=False,
+                       description="Rotate the half circle by 90 degrees")
     space_evenly: BoolProperty(name="Space evenly", default=False,
                                description="Spread the vertices in even distances")
 
@@ -459,6 +464,7 @@ class SetVertexCurveOp(bpy.types.Operator):
 
         if self.vert_count == 2:
             column.prop(self, "flip")
+            column.prop(self, "rotate")
         if self.vert_count >= 3:
             column.prop(self, "space_evenly")
 
@@ -524,7 +530,7 @@ class SetVertexCurveOp(bpy.types.Operator):
 
         if len(selected) == 2:
             result, msg = circle_2_points(
-                bm, selected, vert_path, tension, self.flip)
+                bm, selected, vert_path, tension, self.flip, self.rotate)
         elif len(selected) == 3:
             result, msg = circle_3_points(
                 bm, selected, vert_path, tension, self.space_evenly)
