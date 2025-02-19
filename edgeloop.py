@@ -96,7 +96,7 @@ class Loop():
         ring = self.edge_rings[edge]
         return (ring[0], ring[len(ring) - 1])
 
-    def set_curve_flow(self, tension, use_rail):
+    def set_curve_flow(self, tension, use_rail, rail_type, rail_start, rail_end):
         count = len(self.edges)
         if count < 2 or self.is_cyclic:
             return
@@ -214,14 +214,18 @@ class Loop():
         #     dir1 = find_direction(start_vert, self.edges[0])
         #     dir2 = find_direction(end_vert, self.edges[-1])
         
-        dir1 = self.edges[0].other_vert(start_vert).co - start_vert.co
-        dir1 = dir1.normalized()
-        dir2 = self.edges[-1].other_vert(end_vert).co - end_vert.co
-        dir2 = dir2.normalized()
+        dir1_unnormalized = self.edges[0].other_vert(start_vert).co - start_vert.co
+        dir1 = dir1_unnormalized.normalized()
+        dir2_unnormalized = self.edges[-1].other_vert(end_vert).co - end_vert.co
+        dir2 = dir2_unnormalized.normalized()
 
         if use_rail:
-            p1 = self.edges[0].other_vert(start_vert).co
-            p4 = self.edges[-1].other_vert(end_vert).co
+            if rail_type == 'ABSOLUTE':
+                p1 = start_vert.co + dir1 * rail_start
+                p4 = end_vert.co + dir2 * rail_end
+            else: # == 'FACTOR'
+                p1 = start_vert.co + dir1_unnormalized * rail_start
+                p4 = end_vert.co + dir2_unnormalized * rail_end
         else:
             p1 = start_vert.co
             p4 = end_vert.co
@@ -232,21 +236,18 @@ class Loop():
         p2 = p1 + (dir1 * scale)
         p3 = p4 + (dir2 * scale)
          
-        #add_debug_verts = False
-        #if add_debug_verts:
-        #    # bmesh.ops.create_vert(self.bm, co=p1)
-        #    # bmesh.ops.create_vert(self.bm, co=p4)
+        # add_debug_verts = False
+        # if add_debug_verts:
+        #    bmesh.ops.create_vert(self.bm, co=p1)
+        #    bmesh.ops.create_vert(self.bm, co=p4)
         #    bmesh.ops.create_vert(self.bm, co=p2)
         #    bmesh.ops.create_vert(self.bm, co=p3)
        
         spline_points = []
-        precision = 1000      
+        precision = 1000
         spline_points = mathutils.geometry.interpolate_bezier(p1, p2, p3, p4, precision)
 
-        if use_rail:
-            map_segment_onto_spline(self.verts[1:-1], spline_points)
-        else:
-            map_segment_onto_spline(self.verts, spline_points)
+        map_segment_onto_spline(self.verts, spline_points)
 
 
 
