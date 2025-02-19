@@ -1,0 +1,28 @@
+schema_version = "1.0.0"
+
+# Example of manifest file for a Blender extension
+# Change the values according to your extension
+id = "EdgeFlow"
+version = "0.9.0"
+name = "EdgeFlow"
+tagline = "Helps adjusting mesh geometry to curved surfaces"
+maintainer = "Benjamin Sauder"
+type = "add-on"
+
+# Optional link to documentation, support, source files, etc
+website = "https://github.com/BenjaminSauder/EdgeFlow/"
+
+# Optional list defined by Blender and server, see:
+# https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
+tags = ["Mesh", "Modeling"]
+
+blender_version_min = "4.2.0"
+
+# License conforming to https://spdx.org/licenses/ (use "SPDX: prefix)
+# https://docs.blender.org/manual/en/dev/advanced/extensions/licenses.html
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+# [permissions]
+# None

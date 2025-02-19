@@ -7,19 +7,37 @@ from . import util
 
 class SetEdgeLoopBase():
 
-    def __init__(self):
-        self.is_invoked = False
-        
+    mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Interpolate between inital position and the calculated end position")
+    
     def get_bm(self, obj):        
         bm = bmesh.from_edit_mesh(obj.data)
         bm.verts.ensure_lookup_table()
         return bm
 
-    def revert(self):        
+    def revert_to_intial_positions(self):        
         for obj in self.objects:
-            for edgeloop in self.edgeloops[obj]:
-                for i, vert in enumerate(edgeloop.verts):
-                    vert.co = edgeloop.initial_vert_positions[i]      
+            for index, pos in self.intial_vert_positions[obj].items():
+                vert = self.bm[obj].verts[index]
+                vert.co = pos
+
+    def store_final_positions(self):        
+        self.final_vert_positions = {}
+        for obj in self.objects:
+            self.final_vert_positions[obj] = {}
+            for index in self.intial_vert_positions[obj].keys():
+                v = self.bm[obj].verts[index]
+                p = v.co.copy()            
+                self.final_vert_positions[obj][v.index] = p
+
+    def apply_mix(self):             
+        if self.mix < 1.0 or (self.mix == 1.0 and self.last_mix < 1.0):
+            for obj in self.objects:
+                for edgeloop in self.edgeloops[obj]:
+                    for vert in edgeloop.verts:
+                        a = self.intial_vert_positions[obj][vert.index]
+                        b = self.final_vert_positions[obj][vert.index]
+                        vert.co = a.lerp(b, self.mix)            
+         
 
     @classmethod
     def poll(cls, context):
@@ -29,14 +47,25 @@ class SetEdgeLoopBase():
             and context.active_object.type == "MESH"
             and context.active_object.mode == 'EDIT')
 
+    '''
+    The base invoke stores affected objects, bmesh and intial vertex positions.
+    The 'redo' calls by the undo system makes the bm invalid - so i have to look it up again...
+    The storing of the intial vertex positions should only happen on the intial code path.  
+    '''
     def invoke(self, context):
-        #print("base invoke")
         self.is_invoked = True
+
+        self.last_mix = self.mix
+        
+        self.intial_vert_positions = {}
+        self.final_vert_positions = {}
+
 
         self.objects = set(context.selected_editable_objects) if context.selected_editable_objects else set([context.object])
         self.bm = {}
         self.edgeloops = {}
-        self.vert_positions = {}
+                
+        store_intial_positions = not self.intial_vert_positions
 
         ignore = set()
         for obj in self.objects:
@@ -44,14 +73,24 @@ class SetEdgeLoopBase():
                 ignore.add(obj)
                 continue
 
-            self.bm[obj] = self.get_bm(obj)
-
-            edges = [e for e in self.bm[obj].edges if e.select]
+            bm = self.get_bm(obj)
+            edges = [e for e in bm.edges if e.select]
             if len(edges) == 0:
                 ignore.add(obj)
                 continue
-          
-            self.edgeloops[obj] = util.get_edgeloops(self.bm[obj], edges)
+
+            self.bm[obj] = bm
+            edge_loops = util.get_edgeloops(bm, edges)
+            self.edgeloops[obj] = edge_loops
+
+            if store_intial_positions:
+                self.intial_vert_positions[obj] = {}
+                for e in edges:
+                    for v in e.verts:
+                        if v.index not in self.intial_vert_positions[obj]:
+                            p = v.co.copy()
+                            p = p.freeze()
+                            self.intial_vert_positions[obj][v.index] = p
 
         self.objects = self.objects - ignore
 
@@ -61,7 +100,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     bl_idname = "mesh.set_edge_flow"
     bl_label = "Set Edge Flow"
     bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "Adjust edge loops to match surface curvature\nALT: reuse last settings"
+    bl_description = "Adjust curvature to match surface defined by edges crossing the edgeloop\nALT: reuse last settings"
 
     blend_mode = (
         ("ABSOLUTE", "Absolute", "", 1),
@@ -71,9 +110,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
     blend_type = (
         ("LINEAR", "Linear", ""),
         ("SMOOTH", "Smooth", ""),
-    )
-
-    mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Interpolate between inital position and the calculated end position")
+    )   
     
     tension: IntProperty(name="Tension", default=180, min=-500, max=500, description="Tension can be used to tighten up the curvature")    
     iterations: IntProperty(name="Iterations", default=8, min=1, soft_max=32, description="How often the curveature operation is repeated")
@@ -114,51 +151,50 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
              
 
     def execute(self, context):
-        # print ("execute")
      
-        if not self.is_invoked:        
+        if not self.is_invoked:             
             return self.invoke(context, None)
-        else:
-            self.revert()
 
-        for obj in self.objects:
-            for i in range(self.iterations):
+        refresh_positions = self.mix == self.last_mix
+        
+        if refresh_positions:  
+            for obj in self.objects:
+                for i in range(self.iterations):
+                    for edgeloop in self.edgeloops[obj]:
+                        edgeloop.set_flow(tension=self.tension / 100.0,
+                                        min_angle=math.radians(self.min_angle))
+
                 for edgeloop in self.edgeloops[obj]:
-                    edgeloop.set_flow(tension=self.tension / 100.0,
-                                      min_angle=math.radians(self.min_angle))
-
-            for edgeloop in self.edgeloops[obj]:
-
-                if self.blend_mode == 'ABSOLUTE':
-                    start = self.blend_start_int
-                    end = self.blend_end_int
-                else:
-                    count = len(edgeloop.verts)
-                    start = round(count * self.blend_start_float)
-                    end = round(count * self.blend_end_float)
+                    if self.blend_mode == 'ABSOLUTE':
+                        start = self.blend_start_int
+                        end = self.blend_end_int
+                    else:
+                        count = len(edgeloop.verts)
+                        start = round(count * self.blend_start_float)
+                        end = round(count * self.blend_end_float)
                 
                 edgeloop.blend_start_end(blend_start=start, blend_end=end, blend_type=self.blend_type)
+        
+            self.store_final_positions()
 
-                if self.mix < 1.0:
-                    for i, vert in enumerate(edgeloop.verts):
-                        vert.co = edgeloop.initial_vert_positions[i].lerp(vert.co, self.mix)
+        self.apply_mix()
 
+        for obj in self.objects:
             self.bm[obj].normal_update()
             bmesh.update_edit_mesh(obj.data)
 
+        self.last_mix = self.mix
         self.is_invoked = False
         return {'FINISHED'}
 
 
     def invoke(self, context, event):
-        # print("invoke")
-
         super(SetEdgeFlowOP, self).invoke(context)
           
-        if event and not event.alt:            
-            self.tension = 180
-            self.iterations = 8           
+        if event and not event.alt:     
             self.mix = 1.0
+            self.tension = 180
+            self.iterations = 16           
             self.min_angle = 0
             self.blend_start_int = 0
             self.blend_end_int = 0
