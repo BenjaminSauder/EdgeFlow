@@ -103,7 +103,13 @@ Back when I first got to see this in action I did quite not understand how it al
 The tool goes over each edge from an edgeloop, and then goes over each vert for this edge. For every vert it searches the points C1-C4 which are used as 'control points' for the spline interpolation - quite similar to how every vector drawing programm works.
 So its all depending on the surrounding geometry - which also means if we have multiple neighbouring edgeloops they all influence each other once we start applying this smoothing. Doing the same operation a few times helps to balance it all out and  converges quickly into something stable after a few iterations - so hence the need for such an option.
 
+# Credits
+Maintainer:
+Benjamin Sauder
 
+Additional contributions:
+IngoClemens
+ora-0
 
 ## Developer Notes
 
