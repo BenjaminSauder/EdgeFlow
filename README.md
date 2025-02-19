@@ -108,8 +108,9 @@ Maintainer:
 Benjamin Sauder
 
 Additional contributions:
-IngoClemens
-ora-0
+
+- IngoClemens
+- ora-0
 
 ## Developer Notes
 
