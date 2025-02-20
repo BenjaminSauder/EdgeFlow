@@ -23,8 +23,8 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
 
     use_rail : BoolProperty(name="Use Rail", default=False, description="The first and last edge stay in place")
     rail_mode: bpy.props.EnumProperty(name="Rail Mode", items=rail_mode, default=2, description="Switch rail mode between using absolute units or a factor of the length of the edge")
-    rail_start_width : FloatProperty(name="Rail Start", default=1.0, soft_min=0.0, subtype='DISTANCE', description="Choose how long the rail is at the start")
-    rail_end_width : FloatProperty(name="Rail End", default=1.0, soft_min=0.0, subtype='DISTANCE', description="Choose how long the rail is at the end")
+    rail_start_width : FloatProperty(name="Rail Start", default=1.0, subtype='DISTANCE', description="Choose how long the rail is at the start")
+    rail_end_width : FloatProperty(name="Rail End", default=1.0, subtype='DISTANCE', description="Choose how long the rail is at the end")
     rail_start_factor : FloatProperty(name="Rail Start", default=1.0, soft_min=0.0, soft_max=1.5, subtype='FACTOR', description="Choose how long the rail is at the start")
     rail_end_factor : FloatProperty(name="Rail End", default=1.0, soft_min=0.0, soft_max=1.5, subtype='FACTOR', description="Choose how long the rail is at the end")
    
