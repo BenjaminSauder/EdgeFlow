@@ -480,9 +480,6 @@ class SetVertexCurveOp(bpy.types.Operator):
         else:
             return False
 
-    def __init__(self):
-        self.intial_vert_positions = []
-
     def get_bm(self, me):
         bm = bmesh.from_edit_mesh(me)
         bm.verts.ensure_lookup_table()
@@ -497,7 +494,8 @@ class SetVertexCurveOp(bpy.types.Operator):
 
     def invoke(self, context, event):
         # print ("-" * 66)
-
+        
+        self.intial_vert_positions = []
         self.vert_count = 0
 
         if event and not event.alt:
