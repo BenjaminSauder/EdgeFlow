@@ -21,7 +21,7 @@ class SetEdgeCurveOP(bpy.types.Operator, op_set_edge_flow.SetEdgeLoopBase):
     mix: FloatProperty(name="Mix", default=1.0, min=0.0, max=1.0, subtype='FACTOR', description="Interpolate between inital position and the calculated end position")
     tension : IntProperty(name="Tension", default=100, soft_min=-500, soft_max=500, description="Tension can be used to tighten up the curvature")
 
-    use_rail : BoolProperty(name="Use Rail", default=False, description="The first and last edge stay in place")
+    use_rail : BoolProperty(name="Use Rail", default=False, description="Customize the interpolation by using the first and last edge of the edgeloop to control the curvature")
     rail_mode: bpy.props.EnumProperty(name="Rail Mode", items=rail_mode, default=2, description="Switch rail mode between using absolute units or a factor of the length of the edge")
     rail_start_width : FloatProperty(name="Rail Start", default=1.0, subtype='DISTANCE', description="Choose how long the rail is at the start")
     rail_end_width : FloatProperty(name="Rail End", default=1.0, subtype='DISTANCE', description="Choose how long the rail is at the end")
