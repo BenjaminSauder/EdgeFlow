@@ -221,8 +221,8 @@ class Loop():
 
         if use_rail:
             if rail_type == 'ABSOLUTE':
-                p1 = start_vert.co + dir1 * rail_start
-                p4 = end_vert.co + dir2 * rail_end
+                p1 = start_vert.co + (dir1_unnormalized - dir1 * rail_start)
+                p4 = end_vert.co + (dir2_unnormalized - dir2 * rail_end)
             else: # == 'FACTOR'
                 p1 = start_vert.co + dir1_unnormalized * rail_start
                 p4 = end_vert.co + dir2_unnormalized * rail_end
