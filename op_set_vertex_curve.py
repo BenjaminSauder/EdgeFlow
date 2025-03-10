@@ -532,8 +532,11 @@ class SetVertexCurveOp(bpy.types.Operator):
             result, msg = circle_2_points(
                 bm, selected, vert_path, tension, self.flip, self.rotate)
         elif len(selected) == 3:
-            result, msg = circle_3_points(
-                bm, selected, vert_path, tension, self.space_evenly)
+            try:
+                result, msg = circle_3_points(
+                    bm, selected, vert_path, tension, self.space_evenly)
+            except TypeError:
+                result = False
         else:
             result, msg = curve_hermite(
                 bm, selected, vert_path, tension, self.space_evenly)
