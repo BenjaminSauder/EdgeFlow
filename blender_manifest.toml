@@ -26,3 +26,11 @@ license = [
 
 # [permissions]
 # None
+
+paths_exclude_pattern = [
+  "__pycache__/",
+  "/.resource/",
+  "/.git/",
+  "/.vscode/",
+  "/*.zip",
+]
