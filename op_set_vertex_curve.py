@@ -323,7 +323,7 @@ def circle_3_points(bm, selected, vert_path, tension, space_evenly):
         p1, p1 + p2, p3, p3 + p4)
 
     if not intersection:
-        return False
+        return 1, "found no intersection"
 
     center = intersection[0]
 
@@ -369,50 +369,75 @@ def circle_2_points(bm, selected, vert_path, tension, flip, rotate):
     '''
     Spaces the vertices into a half circle between two points, orientation is based on the topology of the first vert
     '''
+    tension += 1.0
 
     vert_a = bm.verts[selected[0]]
-    vert_b = bm.verts[selected[1]]
+    vert_c = bm.verts[selected[1]]
 
     a = vert_a.co
-    c = vert_b.co
+    c = vert_c.co
 
-    center = (a + c) * 0.5
+    # If tension is zero, use linear interpolation
+    if tension == 0.0:
+        positions = []
+        samples = len(vert_path)*100
+        for sample in range(samples):
+            mu = sample / samples
+            positions.append(a.lerp(c, mu))
+        
+        map_segment_onto_spline(vert_path, positions)
+        return 0, ""
+
+
     radius = (a - c).magnitude * 0.5
-
-    # n = None
-    # for corner in vert_a.link_loops:
-    #     if corner.link_loop_next.vert == vert_path[1]:
-    #         n = (vert_a.co - corner.link_loop_prev.vert.co).normalized()
-    #         break
-    #     elif corner.link_loop_prev.vert == vert_path[1]:
-    #         n = (corner.link_loop_next.vert.co - vert_a.co).normalized()
-    #         break
-
-    # n = (vert_a.normal + vert_b.normal).normalized()
-        # n = vert_a.normal.cross(a-c).normalized()
-
     n = vert_a.normal.cross(c-a).normalized()
 
     if rotate:
-        n = n .cross(a-c).normalized()
+        n = n.cross(a-c).normalized()
 
     if flip:
         n = -n
 
-    b = center + n * radius
+    ac_center = (a+c) * 0.5
+    b = ac_center + n * radius * tension
+    
+    ab = b-a
+    bc = c-b
 
-    u = c - center
-    v = b - center
+    up = ab.cross(bc).normalized()
 
+    p1 = a + ab * 0.5
+    p3 = b + bc * 0.5
+    p2 = ab.cross(up).normalized()
+    p4 = bc.cross(up).normalized()
+
+    intersection = mathutils.geometry.intersect_line_line(
+        p1, p1 + p2, p3, p3 + p4)
+
+    if not intersection:
+        return 1, "found no intersection"
+
+    center = intersection[0]
+
+    start = a - center
+    middle = b - center
+    end = c - center
+
+    radius = (a - center).magnitude
+    
     positions = []
     samples = len(vert_path)*100
     for sample in range(samples):
         mu = sample / samples
 
-        t = math.pi - (mu * math.pi)
-        p = center + math.cos(t) * u + math.sin(t) * v * (1.0 + tension)
+        if mu <= 0.5:
+            interpolated = start.slerp(middle, mu * 2.0)
+            interpolated = interpolated.normalized() * radius
+        else:
+            interpolated = middle.slerp(end, (mu-0.5) * 2.0)
+            interpolated = interpolated.normalized() * radius
 
-        positions.append(p)
+        positions.append(interpolated + center)
 
     map_segment_onto_spline(vert_path, positions)
 
