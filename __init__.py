@@ -3,7 +3,7 @@ bl_info = {
     "category": "Mesh",
     "author": "Benjamin Sauder",
     "description": "Helps adjusting geometry to curved surfaces",
-    "version": (0, 8),
+    "version": (1, 1, 2),
     "location": "Mesh > Edge > Set Edge Flow",
     "blender": (3, 5, 1),
     "tracker_url": "https://github.com/BenjaminSauder/EdgeFlow/issues",
