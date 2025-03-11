@@ -306,6 +306,18 @@ def circle_3_points(bm, selected, vert_path, tension, space_evenly):
     b = vert_b.co
     c = vert_c.co
 
+    # If tension is zero, use linear interpolation
+    if tension == -1.0:
+        positions = []
+        samples = len(vert_path)*100
+        for sample in range(samples):
+            mu = sample / samples
+            positions.append(a.lerp(c, mu))
+        
+        map_segment_onto_spline(vert_path, positions)
+        return 0, ""
+
+
     ac_center = (a+c) * 0.5
     b = b + (b-ac_center).normalized() * tension
 
