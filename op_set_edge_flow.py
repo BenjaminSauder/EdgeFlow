@@ -173,7 +173,7 @@ class SetEdgeFlowOP(bpy.types.Operator, SetEdgeLoopBase):
                         start = round(count * self.blend_start_float)
                         end = round(count * self.blend_end_float)
                 
-                edgeloop.blend_start_end(blend_start=start, blend_end=end, blend_type=self.blend_type)
+                    edgeloop.blend_start_end(blend_start=start, blend_end=end, blend_type=self.blend_type)
         
             self.store_final_positions()
 
